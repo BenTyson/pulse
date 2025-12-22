@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticles } from '../../lib/supabase';
+import type { Article } from '../../lib/database.types';
+
+const { category } = Astro.params;
+
+const validCategories = ['research', 'business', 'products', 'investment'];
+
+if (!category || !validCategories.includes(category)) {
+  return Astro.redirect('/news');
+}
+
+const categoryInfo: Record<string, { title: string; description: string }> = {
+  research: {
+    title: 'Research',
+    description: 'Latest breakthroughs, discoveries, and academic developments in graphene science.',
+  },
+  business: {
+    title: 'Business',
+    description: 'Industry news, partnerships, mergers, and corporate developments in the graphene sector.',
+  },
+  products: {
+    title: 'Products',
+    description: 'New graphene products, applications, and commercial releases hitting the market.',
+  },
+  investment: {
+    title: 'Investment',
+    description: 'Funding rounds, market trends, IPOs, and financial news in graphene.',
+  },
+};
+
+const info = categoryInfo[category];
+
+const url = Astro.url;
+const currentPage = parseInt(url.searchParams.get('page') || '1');
+const pageSize = 12;
+
+let articles: Article[] = [];
+
+try {
+  articles = await getArticles({
+    category,
+    limit: pageSize,
+    offset: (currentPage - 1) * pageSize,
+  });
+} catch (error) {
+  console.error('Error fetching articles:', error);
+}
+
+const hasMore = articles.length === pageSize;
+---
+
+<BaseLayout
+  title={info.title}
+  description={info.description}
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-6">
+        <a href="/" class="hover:text-silver transition-colors">Home</a>
+        <span>/</span>
+        <a href="/news" class="hover:text-silver transition-colors">News</a>
+        <span>/</span>
+        <span class="text-text-secondary capitalize">{category}</span>
+      </nav>
+
+      <h1 class="text-4xl font-bold text-white mb-4">{info.title}</h1>
+      <p class="text-text-secondary text-lg max-w-2xl">
+        {info.description}
+      </p>
+    </div>
+
+    <!-- Category Navigation -->
+    <div class="flex flex-wrap gap-2 mb-10">
+      <a
+        href="/news"
+        class="px-4 py-2 rounded-md text-sm border border-border text-text-secondary hover:border-silver-dark hover:text-white transition-colors"
+      >
+        All
+      </a>
+      {Object.entries(categoryInfo).map(([slug, cat]) => (
+        <a
+          href={`/category/${slug}`}
+          class:list={[
+            'px-4 py-2 rounded-md text-sm transition-colors',
+            slug === category
+              ? 'bg-white text-black font-medium'
+              : 'border border-border text-text-secondary hover:border-silver-dark hover:text-white',
+          ]}
+        >
+          {cat.title}
+        </a>
+      ))}
+    </div>
+
+    <!-- Articles Grid -->
+    {articles.length > 0 ? (
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {articles.map((article) => (
+          <ArticleCard article={article} />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-24 bg-bg-surface rounded-lg border border-border">
+        <h2 class="text-xl font-semibold text-white mb-2">No {info.title.toLowerCase()} articles yet</h2>
+        <p class="text-text-secondary mb-6">Check back soon for the latest updates.</p>
+        <a
+          href="/news"
+          class="inline-flex items-center justify-center px-6 py-3 bg-white text-black rounded-md font-medium hover:bg-silver-light transition-colors"
+        >
+          Browse all news
+        </a>
+      </div>
+    )}
+
+    <!-- Pagination -->
+    {(currentPage > 1 || hasMore) && (
+      <div class="flex items-center justify-center gap-4">
+        {currentPage > 1 && (
+          <a
+            href={`/category/${category}?page=${currentPage - 1}`}
+            class="px-6 py-3 bg-bg-surface text-silver-bright rounded-lg hover:bg-bg-surface-light transition-colors"
+          >
+            ← Previous
+          </a>
+        )}
+        <span class="text-text-muted">Page {currentPage}</span>
+        {hasMore && (
+          <a
+            href={`/category/${category}?page=${currentPage + 1}`}
+            class="px-6 py-3 bg-bg-surface text-silver-bright rounded-lg hover:bg-bg-surface-light transition-colors"
+          >
+            Next →
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</BaseLayout>

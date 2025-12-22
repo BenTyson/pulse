@@ -1,0 +1,106 @@
+---
+const navItems = [
+  { label: 'News', href: '/news' },
+  { label: 'Wiki', href: '/wiki' },
+  { label: 'Companies', href: '/companies' },
+  { label: 'Newsletter', href: '/newsletter' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-bg-primary/90 backdrop-blur-md border-b border-border">
+  <nav class="max-w-5xl mx-auto px-6">
+    <div class="flex items-center justify-between h-14">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 group">
+        <div class="w-7 h-7 bg-white rounded flex items-center justify-center">
+          <span class="text-bg-primary font-semibold text-xs">GP</span>
+        </div>
+        <span class="text-white font-medium tracking-tight group-hover:text-silver-light transition-colors">
+          Graphene Pulse
+        </span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center gap-6">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'text-sm transition-colors',
+              currentPath.startsWith(item.href)
+                ? 'text-white'
+                : 'text-text-secondary hover:text-white'
+            ]}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+
+      <!-- Search Button -->
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          id="search-button"
+          class="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-border rounded-md text-text-muted hover:text-white hover:border-border-light transition-colors text-sm"
+          aria-label="Search"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="hidden lg:inline">Search</span>
+          <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-xs bg-bg-surface rounded border border-border ml-1">⌘K</kbd>
+        </button>
+
+        <!-- Mobile Menu Button -->
+        <button
+          type="button"
+          class="md:hidden p-2 text-text-secondary hover:text-white transition-colors"
+          aria-label="Toggle menu"
+          id="mobile-menu-button"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="md:hidden hidden" id="mobile-menu">
+    <div class="px-6 py-4 space-y-1 bg-bg-primary border-t border-border">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class:list={[
+            'block py-2 text-sm transition-colors',
+            currentPath.startsWith(item.href)
+              ? 'text-white'
+              : 'text-text-secondary hover:text-white'
+          ]}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</header>
+
+<script>
+  const menuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const searchButton = document.getElementById('search-button');
+
+  menuButton?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  searchButton?.addEventListener('click', () => {
+    if ((window as any).openSearch) {
+      (window as any).openSearch();
+    }
+  });
+</script>

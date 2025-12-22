@@ -1,0 +1,172 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+import { getArticles } from '../lib/supabase';
+import type { Article } from '../lib/database.types';
+
+// Fetch articles from Supabase
+let articles: Article[] = [];
+let featuredArticle: Article | null = null;
+
+try {
+  const [featuredResults, recentResults] = await Promise.all([
+    getArticles({ featured: true, limit: 1 }),
+    getArticles({ limit: 9 }),
+  ]);
+  featuredArticle = featuredResults[0] || null;
+  articles = recentResults.filter((a) => a.id !== featuredArticle?.id);
+} catch (error) {
+  console.error('Error fetching articles:', error);
+}
+
+const categories = [
+  { name: 'Research', slug: 'research', description: 'Breakthroughs and discoveries' },
+  { name: 'Business', slug: 'business', description: 'Industry news and partnerships' },
+  { name: 'Products', slug: 'products', description: 'Applications and releases' },
+  { name: 'Investment', slug: 'investment', description: 'Funding and market trends' },
+];
+---
+
+<BaseLayout title="Graphene Pulse">
+  <!-- Hero Section -->
+  <section class="border-b border-border">
+    <div class="max-w-5xl mx-auto px-6 py-24 md:py-32">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+          Graphene Pulse
+        </h1>
+        <p class="text-xl md:text-2xl text-text-secondary mb-10 leading-relaxed">
+          The definitive source for graphene industry news, research, and market intelligence.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a
+            href="/news"
+            class="inline-flex items-center justify-center px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-silver-light transition-colors"
+          >
+            Browse News
+          </a>
+          <a
+            href="/wiki"
+            class="inline-flex items-center justify-center px-6 py-3 border border-border-light text-white font-medium rounded-md hover:bg-bg-surface hover:border-silver-dark transition-colors"
+          >
+            Explore Wiki
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Article -->
+  {featuredArticle && (
+    <section class="border-b border-border">
+      <div class="max-w-5xl mx-auto px-6 py-16">
+        <div class="flex items-center justify-between mb-8">
+          <span class="text-xs font-medium uppercase tracking-wider text-text-muted">Featured</span>
+        </div>
+        <ArticleCard article={featuredArticle} featured />
+      </div>
+    </section>
+  )}
+
+  <!-- Latest News -->
+  <section class="border-b border-border">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <div class="flex items-center justify-between mb-10">
+        <h2 class="text-2xl font-semibold text-white">Latest</h2>
+        <a href="/news" class="text-sm text-text-secondary hover:text-white transition-colors">
+          View all
+        </a>
+      </div>
+
+      {articles.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
+          {articles.slice(0, 6).map((article) => (
+            <div class="bg-bg-primary">
+              <ArticleCard article={article} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-20">
+          <p class="text-text-secondary">No articles yet.</p>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="border-b border-border">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <h2 class="text-2xl font-semibold text-white mb-10">Categories</h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
+        {categories.map((category) => (
+          <a
+            href={`/category/${category.slug}`}
+            class="group bg-bg-primary p-6 hover:bg-bg-surface transition-colors"
+          >
+            <h3 class="text-base font-medium text-white group-hover:text-silver-light transition-colors mb-2">
+              {category.name}
+            </h3>
+            <p class="text-sm text-text-muted">{category.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Wiki Preview -->
+  <section class="border-b border-border">
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="text-xs font-medium uppercase tracking-wider text-text-muted mb-4 block">Knowledge Base</span>
+          <h2 class="text-3xl font-semibold text-white mb-4">
+            The Graphene Wiki
+          </h2>
+          <p class="text-text-secondary mb-8 leading-relaxed">
+            A comprehensive reference covering graphene properties, production methods, and applications.
+          </p>
+          <ul class="space-y-3 mb-8">
+            {['Properties & characteristics', 'Production methods', 'Real-world applications', 'Industry directory'].map((item) => (
+              <li class="flex items-center gap-3 text-text-secondary text-sm">
+                <span class="w-1 h-1 bg-silver-dark rounded-full"></span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <a
+            href="/wiki"
+            class="inline-flex items-center gap-2 text-white hover:text-silver-light transition-colors"
+          >
+            <span>Explore the Wiki</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+        <div class="hidden md:block">
+          <div class="bg-bg-surface rounded-lg p-6 border border-border font-mono text-sm">
+            <div class="text-text-muted mb-4">// Graphene at a glance</div>
+            <div class="space-y-2">
+              <div><span class="text-text-muted">strength</span><span class="text-text-secondary">:</span> <span class="text-white">"200× steel"</span></div>
+              <div><span class="text-text-muted">conductivity</span><span class="text-text-secondary">:</span> <span class="text-white">"best known"</span></div>
+              <div><span class="text-text-muted">thickness</span><span class="text-text-secondary">:</span> <span class="text-white">"1 atom"</span></div>
+              <div><span class="text-text-muted">transparency</span><span class="text-text-secondary">:</span> <span class="text-white">"97.7%"</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter -->
+  <section>
+    <div class="max-w-5xl mx-auto px-6 py-16">
+      <NewsletterSignup
+        heading="Weekly Digest"
+        description="Graphene news and insights delivered to your inbox."
+      />
+    </div>
+  </section>
+</BaseLayout>

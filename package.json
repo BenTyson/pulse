@@ -1,0 +1,38 @@
+{
+  "name": "graphene-pulse",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "AI-powered graphene news aggregation and knowledge hub",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "node ./dist/server/entry.mjs",
+    "astro": "astro",
+    "scrape": "tsx workers/scraper/run.ts",
+    "scrape:seed": "tsx workers/scraper/run.ts --seed",
+    "scrape:stats": "tsx workers/scraper/run.ts --stats",
+    "process": "tsx workers/processor/run.ts",
+    "process:all": "tsx workers/processor/run.ts --all",
+    "process:stats": "tsx workers/processor/run.ts --stats",
+    "newsletter": "tsx workers/newsletter/run.ts",
+    "newsletter:send": "tsx workers/newsletter/run.ts --send",
+    "newsletter:stats": "tsx workers/newsletter/run.ts --stats"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
+    "@astrojs/node": "^9.5.1",
+    "@astrojs/sitemap": "^3.6.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.6",
+    "dotenv": "^17.2.3",
+    "marked": "^17.0.1",
+    "resend": "^6.6.0",
+    "rss-parser": "^3.13.0",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

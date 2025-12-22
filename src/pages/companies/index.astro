@@ -1,0 +1,152 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCompanies } from '../../lib/supabase';
+import type { Company } from '../../lib/database.types';
+
+let companies: Company[] = [];
+
+try {
+  companies = await getCompanies();
+} catch (error) {
+  console.error('Error fetching companies:', error);
+}
+
+const companyTypes = [
+  { slug: 'manufacturer', label: 'Manufacturers' },
+  { slug: 'startup', label: 'Startups' },
+  { slug: 'research', label: 'Research Labs' },
+];
+
+// Group companies by type
+const groupedCompanies = companyTypes.reduce((acc, type) => {
+  acc[type.slug] = companies.filter((c) => c.company_type === type.slug);
+  return acc;
+}, {} as Record<string, Company[]>);
+---
+
+<BaseLayout
+  title="Companies"
+  description="Directory of graphene manufacturers, startups, and research labs worldwide."
+>
+  <!-- Hero -->
+  <section class="hero-gradient border-b border-border">
+    <div class="max-w-5xl mx-auto px-6 py-20">
+      <h1 class="text-4xl font-bold text-white mb-4">
+        Company Directory
+      </h1>
+      <p class="text-lg text-text-secondary max-w-2xl">
+        Discover graphene manufacturers, innovative startups, and leading research institutions worldwide.
+      </p>
+    </div>
+  </section>
+
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <!-- Type Navigation -->
+    <div class="flex flex-wrap gap-2 mb-12">
+      {companyTypes.map((type) => (
+        <a
+          href={`#${type.slug}`}
+          class="px-4 py-2 rounded-md text-sm border border-border text-text-secondary hover:border-silver-dark hover:text-white transition-colors"
+        >
+          {type.label}
+          <span class="ml-1 opacity-50">({groupedCompanies[type.slug]?.length || 0})</span>
+        </a>
+      ))}
+    </div>
+
+    <!-- Company Sections -->
+    {companyTypes.map((type) => (
+      <section id={type.slug} class="mb-16">
+        <h2 class="text-xl font-semibold text-white mb-6">{type.label}</h2>
+
+        {groupedCompanies[type.slug]?.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
+            {groupedCompanies[type.slug].map((company) => (
+              <a
+                href={`/companies/${company.slug}`}
+                class="group bg-bg-primary p-6 hover:bg-bg-surface transition-colors"
+              >
+                <div class="flex items-start gap-4">
+                  {company.logo_url ? (
+                    <img
+                      src={company.logo_url}
+                      alt={company.name}
+                      class="w-10 h-10 rounded object-contain bg-white"
+                    />
+                  ) : (
+                    <div class="w-10 h-10 bg-bg-surface rounded flex items-center justify-center text-text-muted font-medium text-sm border border-border">
+                      {company.name.charAt(0)}
+                    </div>
+                  )}
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-medium text-white group-hover:text-silver-light transition-colors truncate">
+                      {company.name}
+                    </h3>
+                    {company.headquarters && (
+                      <p class="text-text-muted text-sm">{company.headquarters}</p>
+                    )}
+                  </div>
+                </div>
+                {company.description && (
+                  <p class="text-text-secondary text-sm mt-4 line-clamp-2">
+                    {company.description}
+                  </p>
+                )}
+                {company.focus_areas && company.focus_areas.length > 0 && (
+                  <div class="flex flex-wrap gap-2 mt-4">
+                    {company.focus_areas.slice(0, 3).map((area) => (
+                      <span class="badge">
+                        {area}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-16 border border-border rounded-lg">
+            <p class="text-text-secondary">No {type.label.toLowerCase()} listed yet.</p>
+            <p class="text-text-muted text-sm mt-2">Check back soon for updates.</p>
+          </div>
+        )}
+      </section>
+    ))}
+
+    <!-- Submit Company CTA -->
+    <section class="cta-gradient border border-border rounded-lg p-12 text-center">
+      <h2 class="text-xl font-semibold text-white mb-3">
+        Know a company we're missing?
+      </h2>
+      <p class="text-text-secondary mb-6 max-w-md mx-auto">
+        Help us build the most comprehensive graphene company directory.
+      </p>
+      <a
+        href="mailto:submit@graphenepulse.com?subject=Company%20Submission"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-silver-light transition-colors"
+      >
+        <span>Submit a Company</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
+  }
+
+  .cta-gradient {
+    background: linear-gradient(135deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+  }
+</style>

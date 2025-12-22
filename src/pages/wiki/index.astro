@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWikiPages } from '../../lib/supabase';
+
+let wikiPages: any[] = [];
+
+try {
+  wikiPages = await getWikiPages();
+} catch (error) {
+  console.error('Error fetching wiki pages:', error);
+}
+
+// Group pages by category based on slug patterns
+const featuredPage = wikiPages.find(p => p.slug === 'what-is-graphene');
+const otherPages = wikiPages.filter(p => p.slug !== 'what-is-graphene');
+---
+
+<BaseLayout
+  title="Wiki"
+  description="The comprehensive graphene knowledge base. Learn about properties, production methods, applications, and more."
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-silver-bright mb-4">
+        Graphene Wiki
+      </h1>
+      <p class="text-xl text-text-secondary max-w-2xl">
+        A comprehensive knowledge base covering graphene fundamentals, properties, production methods, and applications.
+      </p>
+    </div>
+
+    <!-- Featured Article -->
+    {featuredPage && (
+      <a
+        href={`/wiki/${featuredPage.slug}`}
+        class="block mb-12 p-8 bg-bg-surface rounded-xl border border-border hover:border-silver-dark transition-colors group"
+      >
+        <span class="text-xs font-medium uppercase tracking-wider text-text-muted mb-3 block">Start Here</span>
+        <h2 class="text-2xl font-semibold text-silver-bright group-hover:text-white transition-colors mb-3">
+          {featuredPage.title}
+        </h2>
+        <p class="text-text-secondary mb-4">
+          {featuredPage.excerpt}
+        </p>
+        <span class="text-silver group-hover:text-silver-light transition-colors text-sm font-medium">
+          Read article
+        </span>
+      </a>
+    )}
+
+    <!-- Other Articles -->
+    {otherPages.length > 0 && (
+      <div class="space-y-4">
+        <h2 class="text-sm font-medium uppercase tracking-wider text-text-muted mb-4">
+          Browse Topics
+        </h2>
+        <div class="grid gap-4">
+          {otherPages.map((page) => (
+            <a
+              href={`/wiki/${page.slug}`}
+              class="block p-6 bg-bg-surface rounded-lg border border-border hover:border-silver-dark transition-colors group"
+            >
+              <h3 class="text-lg font-medium text-silver-bright group-hover:text-white transition-colors mb-2">
+                {page.title}
+              </h3>
+              {page.excerpt && (
+                <p class="text-text-secondary text-sm line-clamp-2">
+                  {page.excerpt}
+                </p>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <!-- Quick Facts -->
+    <div class="mt-16 pt-12 border-t border-border">
+      <h2 class="text-sm font-medium uppercase tracking-wider text-text-muted mb-6">
+        Graphene at a Glance
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4">
+          <div class="text-2xl font-semibold text-silver-bright">200x</div>
+          <div class="text-sm text-text-muted mt-1">Stronger than steel</div>
+        </div>
+        <div class="text-center p-4">
+          <div class="text-2xl font-semibold text-silver-bright">1 atom</div>
+          <div class="text-sm text-text-muted mt-1">Thickness</div>
+        </div>
+        <div class="text-center p-4">
+          <div class="text-2xl font-semibold text-silver-bright">97.7%</div>
+          <div class="text-sm text-text-muted mt-1">Light transmission</div>
+        </div>
+        <div class="text-center p-4">
+          <div class="text-2xl font-semibold text-silver-bright">5000</div>
+          <div class="text-sm text-text-muted mt-1">W/mK conductivity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Companies Link -->
+    <div class="mt-12 p-6 bg-bg-surface rounded-lg border border-border">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-medium text-silver-bright mb-1">
+            Companies Directory
+          </h3>
+          <p class="text-text-secondary text-sm">
+            Explore graphene manufacturers, startups, and research labs
+          </p>
+        </div>
+        <a
+          href="/companies"
+          class="px-4 py-2 text-sm font-medium text-silver hover:text-white transition-colors"
+        >
+          View all
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

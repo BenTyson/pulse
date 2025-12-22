@@ -1,0 +1,116 @@
+---
+const currentYear = new Date().getFullYear();
+
+const footerLinks = {
+  explore: [
+    { label: 'Latest News', href: '/news' },
+    { label: 'Research', href: '/category/research' },
+    { label: 'Business', href: '/category/business' },
+    { label: 'Products', href: '/category/products' },
+  ],
+  learn: [
+    { label: 'What is Graphene?', href: '/wiki/what-is-graphene' },
+    { label: 'Properties', href: '/wiki/properties' },
+    { label: 'Applications', href: '/wiki/applications' },
+    { label: 'Glossary', href: '/wiki/glossary' },
+  ],
+  connect: [
+    { label: 'Newsletter', href: '/newsletter' },
+    { label: 'Companies', href: '/companies' },
+    { label: 'About', href: '/about' },
+  ],
+};
+---
+
+<footer class="bg-bg-surface border-t border-bg-surface-light mt-auto">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="flex items-center gap-2 group mb-4">
+          <div class="w-8 h-8 bg-gradient-to-br from-silver to-silver-light rounded-lg flex items-center justify-center">
+            <span class="text-bg-primary font-bold text-sm">GP</span>
+          </div>
+          <span class="text-silver-bright font-semibold text-lg tracking-tight">
+            Graphene Pulse
+          </span>
+        </a>
+        <p class="text-text-secondary text-sm leading-relaxed">
+          The pulse of the graphene industry. AI-powered news aggregation and knowledge hub.
+        </p>
+      </div>
+
+      <!-- Explore -->
+      <div>
+        <h4 class="text-silver-bright font-semibold text-sm uppercase tracking-wider mb-4">
+          Explore
+        </h4>
+        <ul class="space-y-2">
+          {footerLinks.explore.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-text-secondary hover:text-silver-bright text-sm transition-colors"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Learn -->
+      <div>
+        <h4 class="text-silver-bright font-semibold text-sm uppercase tracking-wider mb-4">
+          Learn
+        </h4>
+        <ul class="space-y-2">
+          {footerLinks.learn.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-text-secondary hover:text-silver-bright text-sm transition-colors"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Connect -->
+      <div>
+        <h4 class="text-silver-bright font-semibold text-sm uppercase tracking-wider mb-4">
+          Connect
+        </h4>
+        <ul class="space-y-2">
+          {footerLinks.connect.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class="text-text-secondary hover:text-silver-bright text-sm transition-colors"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="mt-12 pt-8 border-t border-bg-surface-light flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-text-muted text-sm">
+        &copy; {currentYear} Graphene Pulse. All rights reserved.
+      </p>
+      <div class="flex items-center gap-6">
+        <a href="/privacy" class="text-text-muted hover:text-silver text-sm transition-colors">
+          Privacy
+        </a>
+        <a href="/terms" class="text-text-muted hover:text-silver text-sm transition-colors">
+          Terms
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

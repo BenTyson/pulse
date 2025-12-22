@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+---
+
+<BaseLayout
+  title="About"
+  description="Learn about Graphene Pulse - the AI-powered news aggregation and knowledge hub for the graphene industry."
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-16">
+      <h1 class="text-4xl md:text-5xl font-bold text-silver-bright mb-6">
+        About Graphene Pulse
+      </h1>
+      <p class="text-xl text-text-secondary">
+        The pulse of the graphene industry
+      </p>
+    </div>
+
+    <!-- Mission -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright mb-6">Our Mission</h2>
+      <div class="prose prose-invert max-w-none">
+        <p class="text-text-secondary text-lg leading-relaxed mb-4">
+          Graphene Pulse is the premiere news aggregation and knowledge hub for the graphene industry. We serve researchers, investors, engineers, executives, and curious minds with automated, beautifully curated content.
+        </p>
+        <p class="text-text-secondary text-lg leading-relaxed">
+          Think of us as <strong class="text-silver-bright">TechCrunch meets Wikipedia for graphene</strong>—authoritative but accessible, beautiful but substantive, automated but high-quality.
+        </p>
+      </div>
+    </section>
+
+    <!-- What We Offer -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright mb-6">What We Offer</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-bg-surface rounded-xl p-6">
+          <span class="text-3xl mb-3 block">📰</span>
+          <h3 class="text-lg font-semibold text-silver-bright mb-2">Automated News</h3>
+          <p class="text-text-secondary">
+            AI-powered pipeline that scrapes, filters, classifies, and summarizes graphene news from dozens of sources—updated daily.
+          </p>
+        </div>
+        <div class="bg-bg-surface rounded-xl p-6">
+          <span class="text-3xl mb-3 block">📚</span>
+          <h3 class="text-lg font-semibold text-silver-bright mb-2">Knowledge Wiki</h3>
+          <p class="text-text-secondary">
+            A magazine-quality knowledge base covering graphene properties, applications, production methods, and more.
+          </p>
+        </div>
+        <div class="bg-bg-surface rounded-xl p-6">
+          <span class="text-3xl mb-3 block">📧</span>
+          <h3 class="text-lg font-semibold text-silver-bright mb-2">Weekly Newsletter</h3>
+          <p class="text-text-secondary">
+            "Graphene Weekly" delivers the top stories and deep dives straight to your inbox every week.
+          </p>
+        </div>
+        <div class="bg-bg-surface rounded-xl p-6">
+          <span class="text-3xl mb-3 block">🏢</span>
+          <h3 class="text-lg font-semibold text-silver-bright mb-2">Company Directory</h3>
+          <p class="text-text-secondary">
+            A comprehensive database of graphene manufacturers, startups, and research labs worldwide.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Graphene Matters -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright mb-6">Why Graphene Matters</h2>
+      <div class="bg-bg-surface rounded-xl p-8">
+        <div class="grid md:grid-cols-3 gap-8 text-center mb-8">
+          <div>
+            <div class="text-4xl font-bold text-silver-bright mb-2">$200M+</div>
+            <div class="text-text-secondary">Market size (2023)</div>
+          </div>
+          <div>
+            <div class="text-4xl font-bold text-silver-bright mb-2">$1.5B+</div>
+            <div class="text-text-secondary">Projected by 2030</div>
+          </div>
+          <div>
+            <div class="text-4xl font-bold text-silver-bright mb-2">~30%</div>
+            <div class="text-text-secondary">Annual growth rate</div>
+          </div>
+        </div>
+        <p class="text-text-secondary text-center">
+          Graphene is revolutionizing industries from electronics to energy storage, healthcare to construction. Stay informed with Graphene Pulse.
+        </p>
+      </div>
+    </section>
+
+    <!-- Our Audience -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright mb-6">Who We Serve</h2>
+      <div class="space-y-4">
+        <div class="flex items-start gap-4 p-4 bg-bg-surface rounded-lg">
+          <span class="text-2xl">🔬</span>
+          <div>
+            <h3 class="font-semibold text-silver-bright">Researchers & Scientists</h3>
+            <p class="text-text-secondary text-sm">Latest papers, breakthroughs, and funding opportunities</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-bg-surface rounded-lg">
+          <span class="text-2xl">💰</span>
+          <div>
+            <h3 class="font-semibold text-silver-bright">Investors</h3>
+            <p class="text-text-secondary text-sm">Market trends, company news, funding rounds, and IPOs</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-bg-surface rounded-lg">
+          <span class="text-2xl">⚙️</span>
+          <div>
+            <h3 class="font-semibold text-silver-bright">Engineers & Developers</h3>
+            <p class="text-text-secondary text-sm">Applications, products, and technical developments</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-bg-surface rounded-lg">
+          <span class="text-2xl">💼</span>
+          <div>
+            <h3 class="font-semibold text-silver-bright">Executives & Industry</h3>
+            <p class="text-text-secondary text-sm">Market intelligence, partnerships, and regulatory updates</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-bg-surface rounded-lg">
+          <span class="text-2xl">🎓</span>
+          <div>
+            <h3 class="font-semibold text-silver-bright">Students & Curious Minds</h3>
+            <p class="text-text-secondary text-sm">Educational content, career opportunities, and fascinating discoveries</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter CTA -->
+    <section>
+      <NewsletterSignup
+        heading="Stay Connected"
+        description="Join thousands of graphene enthusiasts who get the latest news delivered to their inbox."
+      />
+    </section>
+  </div>
+</BaseLayout>

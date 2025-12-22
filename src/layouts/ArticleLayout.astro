@@ -1,0 +1,160 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { Article } from '../lib/database.types';
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+
+
+const formattedDate = article.published_at
+  ? new Date(article.published_at).toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  : null;
+---
+
+<BaseLayout
+  title={article.title}
+  description={article.summary || undefined}
+  ogType="article"
+  publishedAt={article.published_at || undefined}
+  author={article.author || undefined}
+>
+  <article class="py-12">
+    <!-- Header -->
+    <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-text-muted mb-6">
+        <a href="/" class="hover:text-silver transition-colors">Home</a>
+        <span>/</span>
+        <a href="/news" class="hover:text-silver transition-colors">News</a>
+        {article.category && (
+          <>
+            <span>/</span>
+            <a href={`/category/${article.category}`} class="hover:text-silver transition-colors capitalize">
+              {article.category}
+            </a>
+          </>
+        )}
+      </nav>
+
+      <!-- Category & Date -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        {article.category && (
+          <span class="badge">
+            {article.category}
+          </span>
+        )}
+        {formattedDate && (
+          <span class="text-text-secondary">{formattedDate}</span>
+        )}
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-4xl md:text-5xl font-bold text-silver-bright leading-tight mb-6">
+        {article.title}
+      </h1>
+
+      <!-- Meta -->
+      <div class="flex flex-wrap items-center gap-4 text-text-secondary">
+        {article.author && (
+          <span>By {article.author}</span>
+        )}
+        {article.source_name && (
+          <span class="flex items-center gap-2">
+            <span class="w-1 h-1 bg-text-muted rounded-full"></span>
+            Source: {article.source_name}
+          </span>
+        )}
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Summary -->
+      {article.summary && (
+        <p class="text-lg text-text-secondary leading-relaxed mb-8">
+          {article.summary}
+        </p>
+      )}
+
+      <!-- Primary CTA: Read Full Article -->
+      {article.source_url && (
+        <div class="my-10 p-6 bg-bg-surface rounded-xl border border-bg-surface-light">
+          <p class="text-text-secondary mb-4">
+            This is a summary. Read the complete article at the source.
+          </p>
+          <a
+            href={article.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-silver transition-colors"
+          >
+            <span>Read Full Article</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+          {article.source_name && (
+            <span class="ml-3 text-text-muted text-sm">via {article.source_name}</span>
+          )}
+        </div>
+      )}
+
+      <!-- Tags -->
+      {article.tags && article.tags.length > 0 && (
+        <div class="mt-8 flex flex-wrap gap-2">
+          {article.tags.map((tag) => (
+            <span class="px-3 py-1 bg-bg-surface rounded-full text-sm text-text-secondary">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <!-- Related Articles (passed via slot) -->
+      <slot name="related" />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose {
+    color: var(--color-text-secondary);
+  }
+
+  .prose :where(h2, h3, h4) {
+    color: var(--color-silver-bright);
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose :where(a) {
+    color: var(--color-silver);
+  }
+
+  .prose :where(a):hover {
+    color: var(--color-silver-light);
+  }
+
+  .prose :where(strong) {
+    color: var(--color-text-primary);
+  }
+
+  .prose :where(code) {
+    background: var(--color-bg-surface);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+  }
+
+  .prose :where(blockquote) {
+    border-left-color: var(--color-silver);
+    color: var(--color-text-secondary);
+  }
+</style>

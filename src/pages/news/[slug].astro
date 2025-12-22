@@ -1,0 +1,47 @@
+---
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getArticleBySlug, getArticles } from '../../lib/supabase';
+import type { Article } from '../../lib/database.types';
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/news');
+}
+
+const article = await getArticleBySlug(slug);
+
+if (!article) {
+  return Astro.redirect('/news');
+}
+
+// Fetch related articles (same category, excluding current)
+let relatedArticles: Article[] = [];
+try {
+  if (article.category) {
+    const categoryArticles = await getArticles({
+      category: article.category,
+      limit: 4,
+    });
+    relatedArticles = categoryArticles.filter((a) => a.id !== article.id).slice(0, 3);
+  }
+} catch (error) {
+  console.error('Error fetching related articles:', error);
+}
+
+---
+
+<ArticleLayout article={article}>
+  <!-- Related Articles -->
+  {relatedArticles.length > 0 && (
+    <section slot="related" class="mt-16 pt-12 border-t border-bg-surface-light">
+      <h2 class="text-2xl font-bold text-silver-bright mb-8">Related Articles</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {relatedArticles.map((related) => (
+          <ArticleCard article={related} />
+        ))}
+      </div>
+    </section>
+  )}
+</ArticleLayout>

@@ -1,0 +1,61 @@
+---
+import { getWikiPages } from '../lib/supabase';
+
+interface Props {
+  currentSlug?: string;
+}
+
+const { currentSlug } = Astro.props;
+
+let wikiPages: any[] = [];
+try {
+  wikiPages = await getWikiPages();
+} catch (error) {
+  console.error('Error fetching wiki pages:', error);
+}
+
+function isActive(slug: string): boolean {
+  return currentSlug === slug;
+}
+---
+
+<nav class="wiki-nav">
+  <div class="space-y-1">
+    <a
+      href="/wiki"
+      class="block py-2 text-sm font-medium text-text-muted hover:text-silver transition-colors mb-4"
+    >
+      All Topics
+    </a>
+
+    {wikiPages.map((page) => (
+      <a
+        href={`/wiki/${page.slug}`}
+        class:list={[
+          'block py-2 text-sm transition-colors border-l-2 pl-4 -ml-px',
+          isActive(page.slug)
+            ? 'text-silver-bright border-silver'
+            : 'text-text-secondary hover:text-silver-bright border-transparent hover:border-silver-dark',
+        ]}
+      >
+        {page.title}
+      </a>
+    ))}
+  </div>
+
+  <div class="mt-8 pt-6 border-t border-border">
+    <a
+      href="/companies"
+      class="block py-2 text-sm text-text-muted hover:text-silver transition-colors"
+    >
+      Companies Directory
+    </a>
+  </div>
+</nav>
+
+<style>
+  .wiki-nav {
+    position: sticky;
+    top: 5rem;
+  }
+</style>

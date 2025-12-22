@@ -1,0 +1,40 @@
+---
+import WikiLayout from '../../layouts/WikiLayout.astro';
+import { getWikiPageBySlug } from '../../lib/supabase';
+import { marked } from 'marked';
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/wiki');
+}
+
+// Try to fetch the page from the database
+let page = await getWikiPageBySlug(slug);
+
+if (!page) {
+  return Astro.redirect('/wiki');
+}
+
+// Configure marked for clean output
+marked.setOptions({
+  gfm: true,
+  breaks: false,
+});
+
+// Process content - strip leading h1 if it duplicates the title
+let content = page.content || '';
+
+// Remove leading # title if it matches the page title (avoid duplication)
+const h1Match = content.match(/^#\s+(.+?)[\r\n]/);
+if (h1Match && h1Match[1].trim().toLowerCase() === page.title.toLowerCase()) {
+  content = content.replace(/^#\s+.+?[\r\n]+/, '');
+}
+
+// Convert markdown to HTML
+const contentHtml = await marked.parse(content);
+---
+
+<WikiLayout page={page}>
+  <Fragment set:html={contentHtml} />
+</WikiLayout>

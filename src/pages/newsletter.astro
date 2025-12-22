@@ -1,0 +1,186 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+---
+
+<BaseLayout
+  title="Newsletter"
+  description="Subscribe to Graphene Weekly - the top graphene news delivered to your inbox every week."
+>
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-silver-bright mb-4">
+        Graphene Weekly
+      </h1>
+      <p class="text-xl text-text-secondary max-w-2xl mx-auto">
+        The essential weekly digest of graphene news, research, and industry developments. Free forever.
+      </p>
+    </div>
+
+    <!-- Signup Form -->
+    <div class="max-w-xl mx-auto mb-16">
+      <NewsletterSignup variant="inline" />
+      <p class="text-center text-text-muted text-sm mt-4">
+        Join 1,000+ researchers, investors, and engineers. Unsubscribe anytime.
+      </p>
+    </div>
+
+    <!-- What You Get -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright text-center mb-8">What's Inside</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="text-center p-6 bg-bg-surface rounded-xl">
+          <div class="w-12 h-12 bg-silver/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-silver" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-silver-bright mb-2">Top Stories</h3>
+          <p class="text-text-secondary text-sm">
+            The most important graphene news of the week, curated and summarized
+          </p>
+        </div>
+        <div class="text-center p-6 bg-bg-surface rounded-xl">
+          <div class="w-12 h-12 bg-silver/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-silver" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-silver-bright mb-2">Research Spotlight</h3>
+          <p class="text-text-secondary text-sm">
+            Deep dives into breakthrough research and emerging applications
+          </p>
+        </div>
+        <div class="text-center p-6 bg-bg-surface rounded-xl">
+          <div class="w-12 h-12 bg-silver/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-silver" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-silver-bright mb-2">Industry Intel</h3>
+          <p class="text-text-secondary text-sm">
+            Funding rounds, partnerships, and market developments
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sample Preview -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright text-center mb-8">Sample Issue</h2>
+      <div class="bg-bg-surface rounded-xl p-6 md:p-8 border border-bg-surface-light">
+        <p class="text-text-muted text-sm mb-6">
+          Week of December 16, 2024
+        </p>
+
+        <h3 class="text-xl font-bold text-silver-bright mb-4">This Week in Graphene</h3>
+
+        <div class="space-y-4 mb-6">
+          <div class="border-l-2 border-silver pl-4">
+            <p class="text-text-secondary">
+              <strong class="text-silver-bright">Samsung announces graphene-enhanced batteries</strong> — New 45Wh cells promise 3x faster charging and 20% higher capacity for 2025 flagship phones.
+            </p>
+          </div>
+          <div class="border-l-2 border-silver pl-4">
+            <p class="text-text-secondary">
+              <strong class="text-silver-bright">MIT breakthrough in graphene transistors</strong> — Researchers achieve stable performance at 100GHz, paving way for next-gen wireless communications.
+            </p>
+          </div>
+          <div class="border-l-2 border-silver pl-4">
+            <p class="text-text-secondary">
+              <strong class="text-silver-bright">First Graphene raises $12M Series B</strong> — Australian company to expand production capacity and enter US market.
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center pt-6 border-t border-bg-surface-light">
+          <span class="text-text-muted text-sm">Plus 5 more stories, research highlights, and more...</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright text-center mb-8">What Readers Say</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-bg-surface rounded-xl p-6">
+          <p class="text-text-secondary italic mb-4">
+            "The only graphene newsletter I actually read every week. Concise, relevant, and beautifully designed."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-silver/20 rounded-full flex items-center justify-center text-silver font-semibold">
+              JC
+            </div>
+            <div>
+              <div class="font-medium text-silver-bright">James Chen</div>
+              <div class="text-text-muted text-sm">Materials Researcher, Stanford</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-bg-surface rounded-xl p-6">
+          <p class="text-text-secondary italic mb-4">
+            "Perfect for staying on top of graphene investments without drowning in technical papers."
+          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-silver/20 rounded-full flex items-center justify-center text-silver font-semibold">
+              SK
+            </div>
+            <div>
+              <div class="font-medium text-silver-bright">Sarah Kim</div>
+              <div class="text-text-muted text-sm">VC Partner, Climate Tech Fund</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold text-silver-bright text-center mb-8">FAQ</h2>
+      <div class="space-y-4">
+        <details class="bg-bg-surface rounded-xl p-6 group">
+          <summary class="font-semibold text-silver-bright cursor-pointer list-none flex items-center justify-between">
+            How often will I receive emails?
+            <svg class="w-5 h-5 text-text-muted group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <p class="text-text-secondary mt-4">
+            Once a week, every Tuesday morning. No spam, no promotional emails—just the newsletter.
+          </p>
+        </details>
+        <details class="bg-bg-surface rounded-xl p-6 group">
+          <summary class="font-semibold text-silver-bright cursor-pointer list-none flex items-center justify-between">
+            Is it really free?
+            <svg class="w-5 h-5 text-text-muted group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <p class="text-text-secondary mt-4">
+            Yes, completely free. We're supported by sponsors who want to reach the graphene community.
+          </p>
+        </details>
+        <details class="bg-bg-surface rounded-xl p-6 group">
+          <summary class="font-semibold text-silver-bright cursor-pointer list-none flex items-center justify-between">
+            Can I unsubscribe?
+            <svg class="w-5 h-5 text-text-muted group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <p class="text-text-secondary mt-4">
+            Of course! Every email includes an unsubscribe link. One click and you're out—no hard feelings.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="text-center">
+      <NewsletterSignup
+        heading="Ready to Stay Informed?"
+        description="Join the growing community of graphene enthusiasts."
+      />
+    </section>
+  </div>
+</BaseLayout>
