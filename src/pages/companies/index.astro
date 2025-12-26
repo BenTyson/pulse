@@ -12,9 +12,24 @@ try {
 }
 
 const companyTypes = [
-  { slug: 'manufacturer', label: 'Manufacturers' },
-  { slug: 'startup', label: 'Startups' },
-  { slug: 'research', label: 'Research Labs' },
+  {
+    slug: 'manufacturer',
+    label: 'Manufacturers',
+    description: 'Companies producing graphene at scale',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M3 21h18M9 8h1m-1 4h1m4-4h1m-1 4h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>`
+  },
+  {
+    slug: 'startup',
+    label: 'Startups',
+    description: 'Innovative graphene ventures',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
+  },
+  {
+    slug: 'research',
+    label: 'Research Labs',
+    description: 'Academic and R&D institutions',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-5 h-5"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44"/><path d="M5.5 8H12m-6.5 4H12m-6.5 4H12"/></svg>`
+  },
 ];
 
 // Group companies by type
@@ -22,115 +37,236 @@ const groupedCompanies = companyTypes.reduce((acc, type) => {
   acc[type.slug] = companies.filter((c) => c.company_type === type.slug);
   return acc;
 }, {} as Record<string, Company[]>);
+
+// Get unique regions
+const regions = [...new Set(companies.map(c => c.headquarters?.split(',').pop()?.trim()).filter(Boolean))];
 ---
 
 <BaseLayout
   title="Companies"
   description="Directory of graphene manufacturers, startups, and research labs worldwide."
 >
-  <!-- Hero -->
-  <section class="hero-gradient border-b border-border">
-    <div class="max-w-5xl mx-auto px-6 py-20">
-      <h1 class="text-4xl font-bold text-white mb-4">
-        Company Directory
-      </h1>
-      <p class="text-lg text-text-secondary max-w-2xl">
-        Discover graphene manufacturers, innovative startups, and leading research institutions worldwide.
-      </p>
+  <div class="relative overflow-hidden">
+    <!-- Subtle Grid Background -->
+    <div class="absolute inset-0 opacity-[0.02] pointer-events-none">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
     </div>
-  </section>
 
-  <div class="max-w-5xl mx-auto px-6 py-12">
-    <!-- Type Navigation -->
-    <div class="flex flex-wrap gap-2 mb-12">
-      {companyTypes.map((type) => (
-        <a
-          href={`#${type.slug}`}
-          class="px-4 py-2 rounded-md text-sm border border-border text-text-secondary hover:border-silver-dark hover:text-white transition-colors"
-        >
-          {type.label}
-          <span class="ml-1 opacity-50">({groupedCompanies[type.slug]?.length || 0})</span>
-        </a>
-      ))}
-    </div>
+    <!-- Hero Section -->
+    <section class="relative border-b border-border">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8">
+          <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-bg-surface/50 text-xs font-medium text-text-muted uppercase tracking-wider mb-6">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+              </svg>
+              Global Directory
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+              Company Directory
+            </h1>
+            <p class="text-xl text-text-secondary max-w-xl leading-relaxed">
+              Discover graphene manufacturers, innovative startups, and leading research institutions worldwide.
+            </p>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-3 gap-px bg-border rounded-lg overflow-hidden">
+            <div class="bg-bg-primary px-6 py-4 text-center">
+              <div class="text-2xl font-bold text-white font-mono">{companies.length}</div>
+              <div class="text-text-muted text-xs uppercase tracking-wider">Companies</div>
+            </div>
+            <div class="bg-bg-primary px-6 py-4 text-center">
+              <div class="text-2xl font-bold text-white font-mono">{companyTypes.length}</div>
+              <div class="text-text-muted text-xs uppercase tracking-wider">Categories</div>
+            </div>
+            <div class="bg-bg-primary px-6 py-4 text-center">
+              <div class="text-2xl font-bold text-white font-mono">{regions.length}</div>
+              <div class="text-text-muted text-xs uppercase tracking-wider">Regions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Cards -->
+    <section class="border-b border-border">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-border rounded-xl overflow-hidden">
+          {companyTypes.map((type) => (
+            <a
+              href={`#${type.slug}`}
+              class="group bg-bg-primary p-6 hover:bg-bg-surface transition-colors"
+            >
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-bg-surface border border-border flex items-center justify-center text-silver group-hover:text-white group-hover:border-silver-dark transition-colors">
+                  <span set:html={type.icon} />
+                </div>
+                <div>
+                  <h3 class="font-semibold text-white group-hover:text-silver-bright transition-colors">
+                    {type.label}
+                  </h3>
+                  <span class="text-xs text-text-muted font-mono">
+                    {groupedCompanies[type.slug]?.length || 0} listed
+                  </span>
+                </div>
+              </div>
+              <p class="text-sm text-text-secondary">
+                {type.description}
+              </p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
 
     <!-- Company Sections -->
-    {companyTypes.map((type) => (
-      <section id={type.slug} class="mb-16">
-        <h2 class="text-xl font-semibold text-white mb-6">{type.label}</h2>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {companyTypes.map((type) => (
+        <section id={type.slug} class="mb-16 scroll-mt-8">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="w-10 h-10 rounded-lg bg-bg-surface border border-border flex items-center justify-center text-silver">
+              <span set:html={type.icon} />
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">{type.label}</h2>
+              <p class="text-text-muted text-sm">{type.description}</p>
+            </div>
+            <div class="ml-auto">
+              <span class="px-3 py-1 text-sm font-mono text-text-muted bg-bg-surface rounded-full border border-border">
+                {groupedCompanies[type.slug]?.length || 0}
+              </span>
+            </div>
+          </div>
 
-        {groupedCompanies[type.slug]?.length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
-            {groupedCompanies[type.slug].map((company) => (
-              <a
-                href={`/companies/${company.slug}`}
-                class="group bg-bg-primary p-6 hover:bg-bg-surface transition-colors"
-              >
-                <div class="flex items-start gap-4">
-                  {company.logo_url ? (
-                    <img
-                      src={company.logo_url}
-                      alt={company.name}
-                      class="w-10 h-10 rounded object-contain bg-white"
-                    />
-                  ) : (
-                    <div class="w-10 h-10 bg-bg-surface rounded flex items-center justify-center text-text-muted font-medium text-sm border border-border">
-                      {company.name.charAt(0)}
+          {groupedCompanies[type.slug]?.length > 0 ? (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border rounded-xl overflow-hidden">
+              {groupedCompanies[type.slug].map((company) => (
+                <a
+                  href={`/companies/${company.slug}`}
+                  class="group bg-bg-primary p-6 hover:bg-bg-surface transition-all duration-200"
+                >
+                  <div class="flex items-start gap-4 mb-4">
+                    {company.logo_url ? (
+                      <img
+                        src={company.logo_url}
+                        alt={company.name}
+                        class="w-12 h-12 rounded-lg object-contain bg-white p-1"
+                      />
+                    ) : (
+                      <div class="w-12 h-12 bg-bg-surface rounded-lg flex items-center justify-center text-text-muted font-semibold text-lg border border-border group-hover:border-silver-dark transition-colors">
+                        {company.name.charAt(0)}
+                      </div>
+                    )}
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-white group-hover:text-silver-bright transition-colors truncate">
+                        {company.name}
+                      </h3>
+                      {company.headquarters && (
+                        <div class="flex items-center gap-1.5 text-text-muted text-sm mt-1">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3.5 h-3.5">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          <span class="truncate">{company.headquarters}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {company.description && (
+                    <p class="text-text-secondary text-sm line-clamp-2 mb-4">
+                      {company.description}
+                    </p>
+                  )}
+
+                  {company.focus_areas && company.focus_areas.length > 0 && (
+                    <div class="flex flex-wrap gap-1.5 mb-4">
+                      {company.focus_areas.slice(0, 3).map((area) => (
+                        <span class="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider rounded bg-bg-surface border border-border text-text-muted">
+                          {area}
+                        </span>
+                      ))}
+                      {company.focus_areas.length > 3 && (
+                        <span class="px-2 py-0.5 text-[10px] font-medium rounded bg-bg-surface border border-border text-text-muted">
+                          +{company.focus_areas.length - 3}
+                        </span>
+                      )}
                     </div>
                   )}
-                  <div class="flex-1 min-w-0">
-                    <h3 class="font-medium text-white group-hover:text-silver-light transition-colors truncate">
-                      {company.name}
-                    </h3>
-                    {company.headquarters && (
-                      <p class="text-text-muted text-sm">{company.headquarters}</p>
-                    )}
-                  </div>
-                </div>
-                {company.description && (
-                  <p class="text-text-secondary text-sm mt-4 line-clamp-2">
-                    {company.description}
-                  </p>
-                )}
-                {company.focus_areas && company.focus_areas.length > 0 && (
-                  <div class="flex flex-wrap gap-2 mt-4">
-                    {company.focus_areas.slice(0, 3).map((area) => (
-                      <span class="badge">
-                        {area}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <div class="text-center py-16 border border-border rounded-lg">
-            <p class="text-text-secondary">No {type.label.toLowerCase()} listed yet.</p>
-            <p class="text-text-muted text-sm mt-2">Check back soon for updates.</p>
-          </div>
-        )}
-      </section>
-    ))}
 
-    <!-- Submit Company CTA -->
-    <section class="cta-gradient border border-border rounded-lg p-12 text-center">
-      <h2 class="text-xl font-semibold text-white mb-3">
-        Know a company we're missing?
-      </h2>
-      <p class="text-text-secondary mb-6 max-w-md mx-auto">
-        Help us build the most comprehensive graphene company directory.
-      </p>
-      <a
-        href="mailto:submit@graphenepulse.com?subject=Company%20Submission"
-        class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-md hover:bg-silver-light transition-colors"
-      >
-        <span>Submit a Company</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-        </svg>
-      </a>
-    </section>
+                  <div class="flex items-center justify-between pt-4 border-t border-border/50">
+                    <span class="text-xs text-text-muted">View profile</span>
+                    <svg class="w-4 h-4 text-silver-dark group-hover:text-silver group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div class="text-center py-16 border border-border rounded-xl bg-bg-surface/30">
+              <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-bg-surface flex items-center justify-center border border-border">
+                <span class="text-text-muted" set:html={type.icon} />
+              </div>
+              <h3 class="text-lg font-semibold text-white mb-2">No {type.label.toLowerCase()} yet</h3>
+              <p class="text-text-secondary text-sm mb-6">Know a company that should be listed here?</p>
+              <a
+                href="mailto:submit@graphenepulse.com?subject=Company%20Submission%20-%20{type.label}"
+                class="inline-flex items-center gap-2 text-sm text-silver hover:text-white transition-colors"
+              >
+                <span>Submit a company</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </a>
+            </div>
+          )}
+        </section>
+      ))}
+
+      <!-- Submit Company CTA -->
+      <section class="relative overflow-hidden border border-border rounded-xl p-12 text-center bg-gradient-to-br from-bg-surface via-bg-surface to-bg-surface-light">
+        <div class="absolute top-0 right-0 w-64 h-64 opacity-[0.02] transform translate-x-1/3 -translate-y-1/3">
+          <svg viewBox="0 0 100 100" fill="currentColor">
+            <polygon points="50,0 93.3,25 93.3,75 50,100 6.7,75 6.7,25" />
+          </svg>
+        </div>
+
+        <div class="relative">
+          <div class="w-14 h-14 mx-auto mb-6 rounded-xl bg-bg-elevated border border-border flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7 text-silver">
+              <path d="M12 5v14m-7-7h14"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white mb-3">
+            Know a company we're missing?
+          </h2>
+          <p class="text-text-secondary mb-8 max-w-md mx-auto">
+            Help us build the most comprehensive graphene company directory. Submit manufacturers, startups, or research institutions.
+          </p>
+          <a
+            href="mailto:submit@graphenepulse.com?subject=Company%20Submission"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-white font-medium rounded-lg hover:bg-silver-light transition-colors"
+            style="color: #000000;"
+          >
+            <span>Submit a Company</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </div>
+      </section>
+    </div>
   </div>
 </BaseLayout>
 
@@ -142,11 +278,7 @@ const groupedCompanies = companyTypes.reduce((acc, type) => {
     overflow: hidden;
   }
 
-  .hero-gradient {
-    background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
-  }
-
-  .cta-gradient {
-    background: linear-gradient(135deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+  .scroll-mt-8 {
+    scroll-margin-top: 2rem;
   }
 </style>
