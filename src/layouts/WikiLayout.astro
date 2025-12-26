@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import WikiNav from '../components/WikiNav.astro';
+import { getWikiPages } from '../lib/supabase';
 import type { WikiPage } from '../lib/database.types';
 
 interface Props {
@@ -8,17 +9,48 @@ interface Props {
 }
 
 const { page } = Astro.props;
-
 const currentSlug = page.slug;
+
+// Get all wiki pages for navigation
+let allPages: any[] = [];
+try {
+  allPages = await getWikiPages();
+} catch (error) {
+  console.error('Error fetching wiki pages:', error);
+}
+
+// Find current index for prev/next navigation
+const currentIndex = allPages.findIndex(p => p.slug === currentSlug);
+const prevPage = currentIndex > 0 ? allPages[currentIndex - 1] : null;
+const nextPage = currentIndex < allPages.length - 1 ? allPages[currentIndex + 1] : null;
+
+// Page metadata for icons
+const pageIcons: Record<string, string> = {
+  'what-is-graphene': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4m-3.5-6.5L16 7m-8 10l-1.5 1.5m11-1.5L16 17M7 7L5.5 5.5"/></svg>`,
+  'properties': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>`,
+  'applications': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>`,
+  'glossary': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8m-8 4h6"/></svg>`,
+};
+
+const currentIcon = pageIcons[currentSlug] || pageIcons['what-is-graphene'];
+
+// Estimate reading time (rough: 200 words per minute)
+const wordCount = (page.content || '').split(/\s+/).length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 ---
 
 <BaseLayout
   title={page.title}
   description={page.meta_description || page.excerpt || undefined}
 >
-  <div class="py-12">
+  <!-- Reading Progress Bar -->
+  <div class="fixed top-0 left-0 right-0 h-0.5 bg-bg-surface z-50">
+    <div id="progress-bar" class="h-full bg-gradient-to-r from-silver-dark to-silver w-0 transition-all duration-150"></div>
+  </div>
+
+  <div class="py-12 md:py-16">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-16">
+      <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12 lg:gap-16">
         <!-- Sidebar -->
         <aside class="hidden lg:block">
           <WikiNav currentSlug={currentSlug} />
@@ -29,29 +61,111 @@ const currentSlug = page.slug;
           <!-- Breadcrumb -->
           <nav class="flex items-center gap-2 text-sm text-text-muted mb-8">
             <a href="/" class="hover:text-silver transition-colors">Home</a>
-            <span class="text-text-muted/50">/</span>
+            <svg class="w-3 h-3 text-text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
             <a href="/wiki" class="hover:text-silver transition-colors">Wiki</a>
           </nav>
 
-          <!-- Title -->
-          <h1 class="text-3xl md:text-4xl font-bold text-silver-bright mb-8 leading-tight">
-            {page.title}
-          </h1>
+          <!-- Header Card -->
+          <div class="relative mb-10 p-6 md:p-8 rounded-xl border border-border bg-gradient-to-br from-bg-surface to-bg-surface-light overflow-hidden">
+            <!-- Decorative hexagon -->
+            <div class="absolute -right-8 -top-8 w-32 h-32 opacity-5">
+              <svg viewBox="0 0 100 100" fill="currentColor">
+                <polygon points="50,0 93.3,25 93.3,75 50,100 6.7,75 6.7,25" />
+              </svg>
+            </div>
 
-          <!-- Content -->
-          <div class="wiki-content">
-            <slot />
+            <div class="relative flex items-start gap-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-white/5 border border-border flex items-center justify-center text-silver">
+                <Fragment set:html={currentIcon} />
+              </div>
+              <div class="flex-1 min-w-0">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
+                  {page.title}
+                </h1>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-text-muted">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {readingTime} min read
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {Math.round(wordCount / 100) * 100}+ words
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Last Updated -->
+          <!-- Table of Contents (for longer articles) -->
+          <div id="toc-container" class="hidden mb-10 p-5 rounded-lg border border-border bg-bg-surface/50">
+            <div class="flex items-center gap-2 text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              On this page
+            </div>
+            <nav id="toc-nav" class="space-y-1 text-sm"></nav>
+          </div>
+
+          <!-- Content -->
+          <article class="wiki-content">
+            <slot />
+          </article>
+
+          <!-- Prev/Next Navigation -->
           <div class="mt-16 pt-8 border-t border-border">
-            <p class="text-text-muted text-sm">
-              Last updated: {new Date(page.updated_at).toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-              })}
-            </p>
+            <div class="grid grid-cols-2 gap-4">
+              {prevPage ? (
+                <a
+                  href={`/wiki/${prevPage.slug}`}
+                  class="group p-4 rounded-lg border border-border hover:border-silver-dark hover:bg-bg-surface transition-all"
+                >
+                  <div class="flex items-center gap-2 text-xs text-text-muted mb-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </div>
+                  <div class="text-sm font-medium text-silver group-hover:text-white transition-colors truncate">
+                    {prevPage.title}
+                  </div>
+                </a>
+              ) : <div />}
+
+              {nextPage ? (
+                <a
+                  href={`/wiki/${nextPage.slug}`}
+                  class="group p-4 rounded-lg border border-border hover:border-silver-dark hover:bg-bg-surface transition-all text-right"
+                >
+                  <div class="flex items-center justify-end gap-2 text-xs text-text-muted mb-1">
+                    Next
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                  <div class="text-sm font-medium text-silver group-hover:text-white transition-colors truncate">
+                    {nextPage.title}
+                  </div>
+                </a>
+              ) : <div />}
+            </div>
+
+            <!-- Last Updated -->
+            <div class="mt-8 text-center">
+              <p class="text-text-muted text-sm">
+                Last updated {new Date(page.updated_at).toLocaleDateString('en-US', {
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </p>
+            </div>
           </div>
         </main>
       </div>
@@ -59,25 +173,92 @@ const currentSlug = page.slug;
   </div>
 </BaseLayout>
 
+<script>
+  // Reading progress bar
+  function updateProgress() {
+    const article = document.querySelector('.wiki-content');
+    const progressBar = document.getElementById('progress-bar');
+    if (!article || !progressBar) return;
+
+    const articleRect = article.getBoundingClientRect();
+    const articleTop = articleRect.top + window.scrollY;
+    const articleHeight = articleRect.height;
+    const windowHeight = window.innerHeight;
+    const scrollY = window.scrollY;
+
+    const progress = Math.min(100, Math.max(0,
+      ((scrollY - articleTop + windowHeight * 0.3) / articleHeight) * 100
+    ));
+
+    progressBar.style.width = `${progress}%`;
+  }
+
+  // Generate table of contents
+  function generateTOC() {
+    const article = document.querySelector('.wiki-content');
+    const tocContainer = document.getElementById('toc-container');
+    const tocNav = document.getElementById('toc-nav');
+    if (!article || !tocContainer || !tocNav) return;
+
+    const headings = article.querySelectorAll('h2, h3');
+    if (headings.length < 3) return; // Only show TOC for articles with 3+ sections
+
+    tocContainer.classList.remove('hidden');
+
+    headings.forEach((heading, index) => {
+      const id = `section-${index}`;
+      heading.id = id;
+
+      const link = document.createElement('a');
+      link.href = `#${id}`;
+      link.textContent = heading.textContent || '';
+      link.className = heading.tagName === 'H3'
+        ? 'block py-1 pl-4 text-text-muted hover:text-silver transition-colors'
+        : 'block py-1 text-text-secondary hover:text-silver-bright transition-colors';
+
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', `#${id}`);
+      });
+
+      tocNav.appendChild(link);
+    });
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    generateTOC();
+    updateProgress();
+  });
+
+  window.addEventListener('scroll', updateProgress, { passive: true });
+</script>
+
 <style is:global>
   .wiki-content {
     color: var(--color-text-secondary);
     font-size: 1.0625rem;
-    line-height: 1.75;
+    line-height: 1.8;
+  }
+
+  .wiki-content > *:first-child {
+    margin-top: 0;
   }
 
   .wiki-content p {
-    margin-bottom: 1.25em;
+    margin-bottom: 1.5em;
   }
 
   .wiki-content h2 {
-    color: var(--color-silver-bright);
+    color: var(--color-white);
     font-size: 1.5rem;
-    font-weight: 600;
-    margin-top: 2.5em;
-    margin-bottom: 0.75em;
-    padding-bottom: 0.5rem;
+    font-weight: 700;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border);
+    scroll-margin-top: 2rem;
   }
 
   .wiki-content h2:first-child {
@@ -88,26 +269,30 @@ const currentSlug = page.slug;
     color: var(--color-silver-bright);
     font-size: 1.25rem;
     font-weight: 600;
-    margin-top: 2em;
-    margin-bottom: 0.5em;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75em;
+    scroll-margin-top: 2rem;
   }
 
   .wiki-content h4 {
     color: var(--color-silver-bright);
     font-size: 1.125rem;
     font-weight: 600;
-    margin-top: 1.5em;
+    margin-top: 2em;
     margin-bottom: 0.5em;
   }
 
   .wiki-content a {
     color: var(--color-silver);
     text-decoration: underline;
-    text-underline-offset: 2px;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--color-silver-dark);
+    transition: all 0.15s ease;
   }
 
   .wiki-content a:hover {
-    color: var(--color-silver-bright);
+    color: var(--color-white);
+    text-decoration-color: var(--color-silver);
   }
 
   .wiki-content strong {
@@ -117,74 +302,156 @@ const currentSlug = page.slug;
 
   .wiki-content code {
     background: var(--color-bg-surface);
-    padding: 0.125rem 0.375rem;
+    padding: 0.2rem 0.4rem;
     border-radius: 0.25rem;
     font-size: 0.875em;
+    border: 1px solid var(--color-border);
   }
 
   .wiki-content pre {
     background: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 1.25rem;
     overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+
+  .wiki-content pre code {
+    background: none;
+    padding: 0;
+    border: none;
   }
 
   .wiki-content blockquote {
     border-left: 3px solid var(--color-silver-dark);
+    background: var(--color-bg-surface);
     color: var(--color-text-secondary);
-    padding-left: 1.25rem;
+    padding: 1rem 1.25rem;
     margin: 1.5rem 0;
+    border-radius: 0 0.5rem 0.5rem 0;
     font-style: italic;
   }
 
   .wiki-content ul {
-    list-style-type: disc;
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 1.5em;
+  }
+
+  .wiki-content ul li {
+    position: relative;
     padding-left: 1.5rem;
-    margin-bottom: 1.25em;
+    margin-bottom: 0.625rem;
+  }
+
+  .wiki-content ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 6px;
+    height: 6px;
+    background: var(--color-silver-dark);
+    border-radius: 50%;
   }
 
   .wiki-content ol {
-    list-style-type: decimal;
-    padding-left: 1.5rem;
-    margin-bottom: 1.25em;
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 1.5em;
+    counter-reset: list-counter;
   }
 
-  .wiki-content li {
-    margin-bottom: 0.5rem;
-    padding-left: 0.25rem;
+  .wiki-content ol li {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 0.625rem;
+    counter-increment: list-counter;
   }
 
-  .wiki-content li::marker {
-    color: var(--color-text-muted);
+  .wiki-content ol li::before {
+    content: counter(list-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-silver-dark);
+    font-family: var(--font-mono);
   }
 
+  .wiki-content li > ul,
+  .wiki-content li > ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  /* Tables - Enhanced */
   .wiki-content table {
     width: 100%;
-    border-collapse: collapse;
-    margin: 1.5rem 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 2rem 0;
+    font-size: 0.9375rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
   }
 
-  .wiki-content th,
-  .wiki-content td {
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    text-align: left;
+  .wiki-content thead {
+    background: var(--color-bg-surface);
   }
 
   .wiki-content th {
-    background: var(--color-bg-surface);
-    color: var(--color-silver-bright);
+    padding: 0.875rem 1rem;
+    text-align: left;
     font-weight: 600;
+    color: var(--color-silver-bright);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .wiki-content td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.15s ease;
+  }
+
+  .wiki-content tr:last-child td {
+    border-bottom: none;
+  }
+
+  .wiki-content tbody tr:hover {
+    background: var(--color-bg-surface);
+  }
+
+  .wiki-content tbody tr:hover td {
+    color: var(--color-silver-bright);
+  }
+
+  /* First column emphasis */
+  .wiki-content td:first-child {
+    color: var(--color-silver-bright);
+    font-weight: 500;
   }
 
   .wiki-content img {
     border-radius: 0.5rem;
     margin: 2rem auto;
+    border: 1px solid var(--color-border);
   }
 
   .wiki-content hr {
     border: none;
-    border-top: 1px solid var(--color-border);
-    margin: 2rem 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--color-border), transparent);
+    margin: 3rem 0;
+  }
+
+  /* Horizontal rules between sections */
+  .wiki-content h2 + hr,
+  .wiki-content hr + h2 {
+    margin-top: 1rem;
   }
 </style>

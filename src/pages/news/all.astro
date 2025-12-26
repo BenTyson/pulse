@@ -4,35 +4,6 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import { getArticles, getCategoriesWithCounts } from '../../lib/supabase';
 import type { Article } from '../../lib/database.types';
 
-const { category } = Astro.params;
-
-const validCategories = ['research', 'business', 'products', 'investment'];
-
-if (!category || !validCategories.includes(category)) {
-  return Astro.redirect('/category/business');
-}
-
-const categoryInfo: Record<string, { title: string; description: string }> = {
-  research: {
-    title: 'Research',
-    description: 'Latest breakthroughs, discoveries, and academic developments in graphene science.',
-  },
-  business: {
-    title: 'Business',
-    description: 'Industry news, partnerships, mergers, and corporate developments in the graphene sector.',
-  },
-  products: {
-    title: 'Products',
-    description: 'New graphene products, applications, and commercial releases hitting the market.',
-  },
-  investment: {
-    title: 'Investment',
-    description: 'Funding rounds, market trends, IPOs, and financial news in graphene.',
-  },
-};
-
-const info = categoryInfo[category];
-
 const url = Astro.url;
 const currentPage = parseInt(url.searchParams.get('page') || '1');
 const pageSize = 12;
@@ -43,11 +14,7 @@ let featuredArticle: Article | null = null;
 
 try {
   const [allArticles, cats] = await Promise.all([
-    getArticles({
-      category,
-      limit: pageSize + 1,
-      offset: (currentPage - 1) * pageSize,
-    }),
+    getArticles({ limit: pageSize + 1, offset: (currentPage - 1) * pageSize }),
     getCategoriesWithCounts(),
   ]);
 
@@ -71,7 +38,6 @@ try {
 }
 
 const totalArticles = categories.reduce((sum, c) => sum + c.count, 0);
-const currentCategoryCount = categories.find(c => c.category === category)?.count || 0;
 const hasMore = articles.length === pageSize || (currentPage === 1 && articles.length === pageSize - 1);
 
 // Category icons
@@ -84,8 +50,8 @@ const categoryIcons: Record<string, string> = {
 ---
 
 <BaseLayout
-  title={`${info.title} News`}
-  description={info.description}
+  title="All News"
+  description="All the latest news and updates from the graphene industry."
 >
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
     <!-- Header -->
@@ -95,22 +61,22 @@ const categoryIcons: Record<string, string> = {
           <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
           Live Feed
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">{info.title}</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">All News</h1>
         <p class="text-text-secondary text-lg max-w-xl">
-          {info.description}
+          Everything happening in graphene research, business, and applications.
         </p>
       </div>
 
       <!-- Stats -->
       <div class="flex items-center gap-6 text-sm">
         <div class="text-center">
-          <div class="text-2xl font-bold text-white font-mono">{currentCategoryCount}</div>
-          <div class="text-text-muted text-xs uppercase tracking-wider">In {category}</div>
+          <div class="text-2xl font-bold text-white font-mono">{totalArticles}</div>
+          <div class="text-text-muted text-xs uppercase tracking-wider">Articles</div>
         </div>
         <div class="w-px h-10 bg-border"></div>
         <div class="text-center">
-          <div class="text-2xl font-bold text-white font-mono">{totalArticles}</div>
-          <div class="text-text-muted text-xs uppercase tracking-wider">Total</div>
+          <div class="text-2xl font-bold text-white font-mono">{categories.length}</div>
+          <div class="text-text-muted text-xs uppercase tracking-wider">Categories</div>
         </div>
       </div>
     </div>
@@ -119,38 +85,23 @@ const categoryIcons: Record<string, string> = {
     <div class="flex flex-wrap items-center gap-2 mb-10 pb-8 border-b border-border">
       <span class="text-xs text-text-muted uppercase tracking-wider mr-2">Filter:</span>
       <a
-        href="/news"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border border-border text-text-secondary hover:border-silver-dark hover:text-white hover:bg-bg-surface transition-all"
+        href="/news/all"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full bg-white border border-white transition-all"
+        style="color: #000000 !important;"
       >
         All
-        <span class="text-xs opacity-50">{totalArticles}</span>
+        <span class="text-xs opacity-70" style="color: #000000;">
+          {totalArticles}
+        </span>
       </a>
       {categories.map((cat) => (
         <a
           href={`/category/${cat.category}`}
-          class:list={[
-            'group inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full transition-all capitalize',
-            cat.category === category
-              ? 'bg-white font-semibold border border-white'
-              : 'border border-border text-text-secondary hover:border-silver-dark hover:text-white hover:bg-bg-surface',
-          ]}
-          style={cat.category === category ? 'color: #000000 !important;' : ''}
+          class="group inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border border-border text-text-secondary hover:border-silver-dark hover:text-white hover:bg-bg-surface transition-all capitalize"
         >
-          <span
-            class:list={[
-              'transition-opacity',
-              cat.category === category ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
-            ]}
-            set:html={categoryIcons[cat.category] || ''}
-            style={cat.category === category ? 'color: #000000;' : ''}
-          />
+          <span class="opacity-50 group-hover:opacity-100 transition-opacity" set:html={categoryIcons[cat.category] || ''} />
           {cat.category}
-          <span
-            class:list={['text-xs', cat.category === category ? 'opacity-70' : 'opacity-50']}
-            style={cat.category === category ? 'color: #000000;' : ''}
-          >
-            {cat.count}
-          </span>
+          <span class="text-xs opacity-50">{cat.count}</span>
         </a>
       ))}
     </div>
@@ -167,10 +118,12 @@ const categoryIcons: Record<string, string> = {
 
           <div class="relative">
             <div class="flex flex-wrap items-center gap-3 mb-4">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium uppercase tracking-wider rounded bg-white/10 text-silver-light capitalize">
-                <span set:html={categoryIcons[category] || ''} />
-                {category}
-              </span>
+              {featuredArticle.category && (
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium uppercase tracking-wider rounded bg-white/10 text-silver-light capitalize">
+                  <span set:html={categoryIcons[featuredArticle.category] || ''} />
+                  {featuredArticle.category}
+                </span>
+              )}
               {featuredArticle.published_at && (
                 <span class="text-text-muted text-sm">
                   {new Date(featuredArticle.published_at).toLocaleDateString('en-US', {
@@ -180,6 +133,9 @@ const categoryIcons: Record<string, string> = {
                   })}
                 </span>
               )}
+              <span class="px-2 py-0.5 text-xs font-medium uppercase tracking-wider rounded bg-silver-dark/20 text-silver">
+                Featured
+              </span>
             </div>
 
             <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 group-hover:text-silver-bright transition-colors leading-tight">
@@ -227,8 +183,8 @@ const categoryIcons: Record<string, string> = {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9m2 10a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
           </svg>
         </div>
-        <h2 class="text-xl font-semibold text-white mb-2">No {info.title.toLowerCase()} articles yet</h2>
-        <p class="text-text-secondary">Check back soon for the latest updates.</p>
+        <h2 class="text-xl font-semibold text-white mb-2">No articles yet</h2>
+        <p class="text-text-secondary">Check back soon for the latest graphene news.</p>
       </div>
     )}
 
@@ -238,7 +194,7 @@ const categoryIcons: Record<string, string> = {
         <div>
           {currentPage > 1 ? (
             <a
-              href={`/category/${category}?page=${currentPage - 1}`}
+              href={`/news/all?page=${currentPage - 1}`}
               class="group inline-flex items-center gap-2 px-4 py-2.5 border border-border text-text-secondary rounded-lg hover:border-silver-dark hover:text-white hover:bg-bg-surface transition-all text-sm font-medium"
             >
               <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,14 +208,14 @@ const categoryIcons: Record<string, string> = {
         <div class="flex items-center gap-2">
           <span class="w-9 h-9 flex items-center justify-center text-sm font-medium text-white bg-white/10 rounded-lg">{currentPage}</span>
           {hasMore && (
-            <a href={`/category/${category}?page=${currentPage + 1}`} class="w-9 h-9 flex items-center justify-center text-sm text-text-muted hover:text-white hover:bg-bg-surface rounded-lg transition-all">{currentPage + 1}</a>
+            <a href={`/news/all?page=${currentPage + 1}`} class="w-9 h-9 flex items-center justify-center text-sm text-text-muted hover:text-white hover:bg-bg-surface rounded-lg transition-all">{currentPage + 1}</a>
           )}
         </div>
 
         <div>
           {hasMore ? (
             <a
-              href={`/category/${category}?page=${currentPage + 1}`}
+              href={`/news/all?page=${currentPage + 1}`}
               class="group inline-flex items-center gap-2 px-4 py-2.5 border border-border text-text-secondary rounded-lg hover:border-silver-dark hover:text-white hover:bg-bg-surface transition-all text-sm font-medium"
             >
               Next
