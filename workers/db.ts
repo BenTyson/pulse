@@ -40,6 +40,7 @@ export async function insertRawItem(item: {
   title: string;
   content?: string;
   url: string;
+  image_url?: string;
   published_at?: string;
 }) {
   const { data, error } = await db

@@ -5,6 +5,8 @@ interface ProcessResult {
   processed: number;
   relevant: number;
   published: number;
+  rejected: number;
+  aiUsed: number;
   errors: number;
 }
 
@@ -58,35 +60,51 @@ export async function processItems(limit = 10): Promise<ProcessResult> {
     processed: 0,
     relevant: 0,
     published: 0,
+    rejected: 0,
+    aiUsed: 0,
     errors: 0,
   };
 
   const items = await getUnprocessedItems(limit);
   console.log(`[Processor] Found ${items.length} unprocessed items`);
+  console.log(`[Processor] Using tiered analysis (AI for ambiguous items only)\n`);
 
   for (const item of items) {
-    console.log(`\n[Processor] Analyzing: ${item.title.slice(0, 60)}...`);
+    console.log(`[Processor] Analyzing: ${item.title.slice(0, 60)}...`);
 
     try {
-      // Analyze with Claude (use AI if API key is available)
-      const useAI = Boolean(process.env.ANTHROPIC_API_KEY);
-      const analysis = await analyzeArticle(item.title, item.content || '', useAI);
+      // Get source name BEFORE analysis for trust-based scoring
+      const sourceName = await getSourceName(item.source_id);
+
+      // Analyze using tiered system
+      // - High confidence items: keyword analysis (fast, no AI)
+      // - Ambiguous items: AI analysis (if API key available)
+      const analysis = await analyzeArticle(
+        item.title,
+        item.content || '',
+        sourceName || ''
+      );
+
       result.processed++;
 
+      if (analysis.usedAI) {
+        result.aiUsed++;
+      }
+
       if (!analysis.isRelevant) {
-        console.log(`  -> Not relevant: ${analysis.relevanceReason}`);
+        console.log(`  -> Rejected (score: ${analysis.filterScore}, tier: ${analysis.filterTier})`);
+        console.log(`     Reason: ${analysis.relevanceReason}`);
+        result.rejected++;
         await markItemProcessed(item.id);
         continue;
       }
 
       result.relevant++;
-      console.log(`  -> Relevant (${analysis.category}): ${analysis.relevanceReason}`);
+      const aiTag = analysis.usedAI ? ' [AI]' : ' [keyword]';
+      console.log(`  -> Relevant${aiTag} (${analysis.category}, score: ${analysis.filterScore})`);
 
       // Generate unique slug
       const slug = await ensureUniqueSlug(generateSlug(item.title));
-
-      // Get source name
-      const sourceName = await getSourceName(item.source_id);
 
       // Create article
       const { data: article, error } = await db
@@ -97,6 +115,7 @@ export async function processItems(limit = 10): Promise<ProcessResult> {
           slug,
           summary: analysis.summary,
           content: item.content,
+          image_url: item.image_url,
           source_id: item.source_id,
           source_url: item.url,
           source_name: sourceName,
@@ -121,8 +140,9 @@ export async function processItems(limit = 10): Promise<ProcessResult> {
       // Mark as processed
       await markItemProcessed(item.id);
 
-      // Small delay to avoid rate limits
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Small delay between items (longer if AI was used)
+      const delay = analysis.usedAI ? 1000 : 200;
+      await new Promise((resolve) => setTimeout(resolve, delay));
     } catch (err: any) {
       console.error(`  -> Error: ${err.message}`);
       result.errors++;
@@ -136,8 +156,15 @@ export async function processItems(limit = 10): Promise<ProcessResult> {
 
 export function printResults(result: ProcessResult) {
   console.log('\n=== Processing Summary ===');
-  console.log(`  Processed: ${result.processed}`);
-  console.log(`  Relevant: ${result.relevant}`);
-  console.log(`  Published: ${result.published}`);
-  console.log(`  Errors: ${result.errors}`);
+  console.log(`  Processed:  ${result.processed}`);
+  console.log(`  Relevant:   ${result.relevant}`);
+  console.log(`  Rejected:   ${result.rejected}`);
+  console.log(`  Published:  ${result.published}`);
+  console.log(`  AI used:    ${result.aiUsed} items`);
+  console.log(`  Errors:     ${result.errors}`);
+
+  if (result.processed > 0) {
+    const aiPercent = Math.round((result.aiUsed / result.processed) * 100);
+    console.log(`\n  AI usage:   ${aiPercent}% of items required AI analysis`);
+  }
 }

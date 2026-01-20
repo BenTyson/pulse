@@ -1,0 +1,675 @@
+import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config';
+
+const db = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY!
+);
+
+interface Company {
+  name: string;
+  slug: string;
+  description: string;
+  website: string;
+  company_type: 'manufacturer' | 'startup' | 'research' | 'investor';
+  focus_areas: string[];
+  founded_year?: number;
+  headquarters: string;
+  employee_count?: string;
+  funding_total?: string;
+  funding_stage?: string;
+}
+
+// Additional companies to expand the database (50+ new entries)
+const expandedCompanies: Company[] = [
+  // =============================================================================
+  // MANUFACTURERS - Additional Global Producers
+  // =============================================================================
+  {
+    name: 'Cabot Corporation',
+    slug: 'cabot-corporation',
+    description: 'Global specialty chemicals company producing carbon-based materials including graphene nanoplatelets. Strong focus on conductive additives for batteries and electronics.',
+    website: 'https://cabotcorp.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Carbon Additives', 'Batteries', 'Conductive Materials', 'Specialty Chemicals'],
+    founded_year: 1882,
+    headquarters: 'Boston, Massachusetts, USA',
+    employee_count: '1000+',
+    funding_stage: 'Public (NYSE: CBT)',
+  },
+  {
+    name: 'Perpetuus Carbon Technologies',
+    slug: 'perpetuus-carbon',
+    description: 'UK manufacturer using plasma processing to produce functionalized graphene and carbon nanomaterials at industrial scale for composites and coatings.',
+    website: 'https://perpetuuscarbon.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Plasma Processing', 'Functionalized Graphene', 'Composites', 'Industrial Scale'],
+    founded_year: 2013,
+    headquarters: 'Swansea, United Kingdom',
+    employee_count: '20-50',
+  },
+  {
+    name: 'Grafton Nano',
+    slug: 'grafton-nano',
+    description: 'Specializes in graphene-enhanced concrete additives for construction industry. Products improve concrete strength, durability, and reduce cement usage.',
+    website: 'https://graftonnano.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Construction', 'Concrete Additives', 'Infrastructure', 'Green Building'],
+    founded_year: 2019,
+    headquarters: 'Dublin, Ireland',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Black Swan Graphene',
+    slug: 'black-swan-graphene',
+    description: 'Canadian company producing high-quality few-layer graphene using eco-friendly plasma methods. Focus on industrial applications and sustainable production.',
+    website: 'https://blackswangraphene.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Few-Layer Graphene', 'Sustainable Production', 'Industrial Applications'],
+    founded_year: 2020,
+    headquarters: 'Montreal, Canada',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Ningbo Morsh Technology',
+    slug: 'ningbo-morsh',
+    description: 'Chinese graphene manufacturer producing graphene oxide, reduced graphene oxide, and graphene nanoplatelets for battery and composite applications.',
+    website: 'https://morshtec.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Graphene Oxide', 'rGO', 'Batteries', 'Mass Production'],
+    founded_year: 2015,
+    headquarters: 'Ningbo, China',
+    employee_count: '100-200',
+  },
+  {
+    name: 'Xiamen Knano Graphene',
+    slug: 'xiamen-knano',
+    description: 'Leading Chinese graphene producer with high-volume production of graphene powder, slurry, and films for energy storage and thermal management.',
+    website: 'https://knano.com.cn',
+    company_type: 'manufacturer',
+    focus_areas: ['Graphene Powder', 'Energy Storage', 'Thermal Management', 'Slurries'],
+    founded_year: 2012,
+    headquarters: 'Xiamen, China',
+    employee_count: '100-200',
+  },
+  {
+    name: 'Graphene NanoChem',
+    slug: 'graphene-nanochem',
+    description: 'Malaysian company producing graphene-enhanced lubricants and industrial chemicals using palm oil derivatives as feedstock.',
+    website: 'https://graphenenanochem.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Lubricants', 'Industrial Chemicals', 'Bio-based Feedstock'],
+    founded_year: 2015,
+    headquarters: 'Kuala Lumpur, Malaysia',
+    employee_count: '50-100',
+  },
+  {
+    name: 'Graphene Square',
+    slug: 'graphene-square',
+    description: 'South Korean CVD graphene manufacturer specializing in large-area graphene films for touch panels, displays, and flexible electronics.',
+    website: 'https://graphenesq.com',
+    company_type: 'manufacturer',
+    focus_areas: ['CVD Graphene', 'Touch Panels', 'Displays', 'Flexible Electronics'],
+    founded_year: 2012,
+    headquarters: 'Seoul, South Korea',
+    employee_count: '50-100',
+  },
+  {
+    name: 'Graphene Platform Corporation',
+    slug: 'graphene-platform',
+    description: 'Japanese company producing high-quality graphene products through proprietary exfoliation process. Focus on electronics and semiconductor applications.',
+    website: 'https://graphene-platform.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Exfoliation', 'Electronics', 'Semiconductors', 'High Purity'],
+    founded_year: 2015,
+    headquarters: 'Tokyo, Japan',
+    employee_count: '20-50',
+  },
+  {
+    name: 'Versarien',
+    slug: 'versarien',
+    description: 'UK engineering materials group producing graphene and 2D materials. Products include Nanene graphene nanoplatelets for composites, coatings, and 3D printing.',
+    website: 'https://versarien.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Nanoplatelets', 'Composites', '3D Printing', 'Engineering Materials'],
+    founded_year: 2010,
+    headquarters: 'Cheltenham, United Kingdom',
+    employee_count: '50-100',
+    funding_stage: 'Public (AIM: VRS)',
+  },
+  {
+    name: 'Graphene Laboratories',
+    slug: 'graphene-labs',
+    description: 'US supplier of graphene research materials including CVD films, graphene oxide, and customized graphene products for R&D applications.',
+    website: 'https://graphenelabs.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Research Materials', 'CVD Films', 'Graphene Oxide', 'Custom Products'],
+    founded_year: 2011,
+    headquarters: 'Ronkonkoma, New York, USA',
+    employee_count: '10-20',
+  },
+  {
+    name: 'Nanesa',
+    slug: 'nanesa',
+    description: 'Italian graphene producer manufacturing graphene oxide and reduced graphene oxide for environmental remediation, energy, and biomedical applications.',
+    website: 'https://nanesa.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Graphene Oxide', 'Environmental', 'Energy', 'Biomedical'],
+    founded_year: 2014,
+    headquarters: 'Arezzo, Italy',
+    employee_count: '10-20',
+  },
+  {
+    name: 'Standard Graphene',
+    slug: 'standard-graphene',
+    description: 'Korean manufacturer specializing in high-quality CVD graphene and graphene quantum dots for electronics, displays, and sensors.',
+    website: 'https://standardgraphene.com',
+    company_type: 'manufacturer',
+    focus_areas: ['CVD Graphene', 'Quantum Dots', 'Electronics', 'Sensors'],
+    founded_year: 2015,
+    headquarters: 'Ulsan, South Korea',
+    employee_count: '20-50',
+  },
+  {
+    name: 'Global Graphene Group',
+    slug: 'global-graphene-group',
+    description: 'Major US graphene producer operating multiple facilities for graphene and silicon-graphene composite production for battery applications.',
+    website: 'https://theglobalgraphenegroup.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Graphene Production', 'Silicon-Graphene', 'Battery Materials', 'Industrial Scale'],
+    founded_year: 2014,
+    headquarters: 'Dayton, Ohio, USA',
+    employee_count: '100-200',
+  },
+  {
+    name: 'ACS Material',
+    slug: 'acs-material',
+    description: 'Advanced chemicals supplier providing high-quality graphene, graphene oxide, and carbon nanotube products for research and industrial applications.',
+    website: 'https://acsmaterial.com',
+    company_type: 'manufacturer',
+    focus_areas: ['Research Materials', 'Graphene Oxide', 'Industrial Supply', 'Carbon Materials'],
+    founded_year: 2009,
+    headquarters: 'Pasadena, California, USA',
+    employee_count: '20-50',
+  },
+
+  // =============================================================================
+  // STARTUPS - Emerging Graphene Companies
+  // =============================================================================
+  {
+    name: 'Lyten',
+    slug: 'lyten',
+    description: 'Develops 3D graphene for next-generation lithium-sulfur batteries, supercapacitors, and composites. Claims 3x energy density improvement over lithium-ion.',
+    website: 'https://lyten.com',
+    company_type: 'startup',
+    focus_areas: ['3D Graphene', 'Lithium-Sulfur Batteries', 'Supercapacitors', 'EVs'],
+    founded_year: 2015,
+    headquarters: 'San Jose, California, USA',
+    employee_count: '100-200',
+    funding_total: '$200M+',
+    funding_stage: 'Series B',
+  },
+  {
+    name: 'Solidion Technology',
+    slug: 'solidion-technology',
+    description: 'Develops graphene-enhanced solid-state batteries for electric vehicles and energy storage with improved safety and energy density.',
+    website: 'https://solidiontech.com',
+    company_type: 'startup',
+    focus_areas: ['Solid-State Batteries', 'EVs', 'Energy Storage', 'Safety'],
+    founded_year: 2018,
+    headquarters: 'Dallas, Texas, USA',
+    employee_count: '50-100',
+    funding_total: '$50M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'Grapheal',
+    slug: 'grapheal',
+    description: 'French biotech startup developing graphene-based biosensors for wound monitoring and diagnostic applications. Spin-off from CEA research lab.',
+    website: 'https://grapheal.com',
+    company_type: 'startup',
+    focus_areas: ['Biosensors', 'Wound Monitoring', 'Diagnostics', 'Medical Devices'],
+    founded_year: 2019,
+    headquarters: 'Grenoble, France',
+    employee_count: '10-20',
+    funding_total: '$5M+',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Graphene Flagship Spin-off: BeDimensional',
+    slug: 'bedimensional',
+    description: 'Italian spin-off from Graphene Flagship producing 2D materials including graphene and h-BN for coatings, composites, and energy applications.',
+    website: 'https://bedimensional.com',
+    company_type: 'startup',
+    focus_areas: ['2D Materials', 'Coatings', 'Composites', 'Energy'],
+    founded_year: 2016,
+    headquarters: 'Genoa, Italy',
+    employee_count: '20-50',
+    funding_total: '$10M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'Emberion',
+    slug: 'emberion',
+    description: 'Finnish company developing graphene-based infrared and thermal imaging sensors for industrial, automotive, and security applications.',
+    website: 'https://emberion.com',
+    company_type: 'startup',
+    focus_areas: ['Infrared Sensors', 'Thermal Imaging', 'Automotive', 'Security'],
+    founded_year: 2016,
+    headquarters: 'Espoo, Finland',
+    employee_count: '20-50',
+    funding_total: '$15M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'Grafmarine',
+    slug: 'grafmarine',
+    description: 'Specializes in graphene-enhanced anti-fouling coatings for marine vessels. Products reduce drag and improve fuel efficiency for shipping industry.',
+    website: 'https://grafmarine.com',
+    company_type: 'startup',
+    focus_areas: ['Marine Coatings', 'Anti-Fouling', 'Shipping', 'Fuel Efficiency'],
+    founded_year: 2019,
+    headquarters: 'Southampton, United Kingdom',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Inbrain Neuroelectronics',
+    slug: 'inbrain-neuroelectronics',
+    description: 'Develops graphene-based brain-computer interfaces for neurological disorder treatment. Products include neural implants for Parkinson\'s and epilepsy.',
+    website: 'https://inbrain-neuroelectronics.com',
+    company_type: 'startup',
+    focus_areas: ['Neuroelectronics', 'Brain-Computer Interface', 'Medical Implants', 'Neurology'],
+    founded_year: 2019,
+    headquarters: 'Barcelona, Spain',
+    employee_count: '50-100',
+    funding_total: '$35M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'GrapheneCA',
+    slug: 'graphene-ca',
+    description: 'US-Israeli company developing graphene-enhanced air purification systems. Products use graphene filters for virus and bacteria removal.',
+    website: 'https://graphene-ca.com',
+    company_type: 'startup',
+    focus_areas: ['Air Purification', 'Filtration', 'Healthcare', 'Clean Air'],
+    founded_year: 2020,
+    headquarters: 'New York, New York, USA',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'ZEN Graphene Solutions',
+    slug: 'zen-graphene',
+    description: 'Canadian company developing graphene-based antimicrobial coatings and conductive inks. Products target healthcare, electronics, and automotive sectors.',
+    website: 'https://zengraphene.com',
+    company_type: 'startup',
+    focus_areas: ['Antimicrobial', 'Conductive Inks', 'Healthcare', 'Coatings'],
+    founded_year: 2016,
+    headquarters: 'Thunder Bay, Ontario, Canada',
+    employee_count: '20-50',
+    funding_stage: 'Public (TSXV: ZEN)',
+  },
+  {
+    name: 'Graphene 3D Lab',
+    slug: 'graphene-3d-lab',
+    description: 'Develops graphene-enhanced 3D printing materials including conductive filaments and battery components for additive manufacturing.',
+    website: 'https://graphene3dlab.com',
+    company_type: 'startup',
+    focus_areas: ['3D Printing', 'Conductive Filaments', 'Additive Manufacturing', 'Batteries'],
+    founded_year: 2013,
+    headquarters: 'Ronkonkoma, New York, USA',
+    employee_count: '10-20',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'Graphene Batteries',
+    slug: 'graphene-batteries',
+    description: 'Norwegian company developing graphene-silicon composite anodes for high-capacity lithium-ion batteries with faster charging.',
+    website: 'https://graphenebatteries.no',
+    company_type: 'startup',
+    focus_areas: ['Battery Anodes', 'Silicon-Graphene', 'Fast Charging', 'High Capacity'],
+    founded_year: 2018,
+    headquarters: 'Oslo, Norway',
+    employee_count: '20-50',
+    funding_total: '$10M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'Grafren',
+    slug: 'grafren',
+    description: 'Swedish startup focused on scaling graphene production using electrochemical exfoliation. Partners with industrial customers for custom graphene solutions.',
+    website: 'https://grafren.com',
+    company_type: 'startup',
+    focus_areas: ['Electrochemical Exfoliation', 'Industrial Scale', 'Custom Solutions'],
+    founded_year: 2019,
+    headquarters: 'Stockholm, Sweden',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Graphene Lighting',
+    slug: 'graphene-lighting',
+    description: 'Spin-off from Manchester developing graphene-based LED lighting products with improved efficiency and heat dissipation.',
+    website: 'https://graphenelighting.co.uk',
+    company_type: 'startup',
+    focus_areas: ['LED Lighting', 'Thermal Management', 'Energy Efficiency'],
+    founded_year: 2015,
+    headquarters: 'Manchester, United Kingdom',
+    employee_count: '10-20',
+    funding_stage: 'Seed',
+  },
+  {
+    name: 'Magnolia Optical Technologies',
+    slug: 'magnolia-optical',
+    description: 'US company developing graphene-based photodetectors and sensors for defense, aerospace, and industrial imaging applications.',
+    website: 'https://magnoliaoptical.com',
+    company_type: 'startup',
+    focus_areas: ['Photodetectors', 'Defense', 'Aerospace', 'Imaging'],
+    founded_year: 2002,
+    headquarters: 'Woburn, Massachusetts, USA',
+    employee_count: '20-50',
+  },
+  {
+    name: 'NanoGraf Corporation',
+    slug: 'nanograf',
+    description: 'Develops silicon-graphene anode materials that increase lithium-ion battery capacity by 30%+. Spin-off from Northwestern University.',
+    website: 'https://nanograf.com',
+    company_type: 'startup',
+    focus_areas: ['Silicon-Graphene', 'Battery Anodes', 'Energy Storage', 'High Capacity'],
+    founded_year: 2016,
+    headquarters: 'Chicago, Illinois, USA',
+    employee_count: '50-100',
+    funding_total: '$25M+',
+    funding_stage: 'Series B',
+  },
+  {
+    name: 'Graphite Central',
+    slug: 'graphite-central',
+    description: 'European materials company providing graphite and graphene products for battery, refractory, and lubricant applications.',
+    website: 'https://graphitecentral.com',
+    company_type: 'startup',
+    focus_areas: ['Graphite Supply', 'Battery Materials', 'Refractories', 'Lubricants'],
+    founded_year: 2017,
+    headquarters: 'Munich, Germany',
+    employee_count: '20-50',
+  },
+  {
+    name: 'GraphWear Technologies',
+    slug: 'graphwear',
+    description: 'Develops graphene-based sweat sensors for continuous, non-invasive glucose monitoring for diabetes management.',
+    website: 'https://graphwear.co',
+    company_type: 'startup',
+    focus_areas: ['Wearables', 'Glucose Monitoring', 'Healthcare', 'Biosensors'],
+    founded_year: 2015,
+    headquarters: 'San Francisco, California, USA',
+    employee_count: '20-50',
+    funding_total: '$20M+',
+    funding_stage: 'Series A',
+  },
+  {
+    name: 'XG Sciences Automotive',
+    slug: 'xg-sciences-automotive',
+    description: 'Division of XG Sciences focused on graphene-enhanced automotive components including battery materials, structural parts, and thermal management.',
+    website: 'https://xgsciences.com/automotive',
+    company_type: 'startup',
+    focus_areas: ['Automotive', 'Battery Materials', 'Structural Parts', 'Thermal Management'],
+    founded_year: 2018,
+    headquarters: 'Lansing, Michigan, USA',
+    employee_count: '20-50',
+  },
+
+  // =============================================================================
+  // RESEARCH INSTITUTIONS - Additional Global Research Centers
+  // =============================================================================
+  {
+    name: 'MIT Graphene Research',
+    slug: 'mit-graphene',
+    description: 'Massachusetts Institute of Technology research groups focusing on graphene synthesis, electronics, and novel 2D material heterostructures.',
+    website: 'https://web.mit.edu',
+    company_type: 'research',
+    focus_areas: ['Fundamental Research', '2D Heterostructures', 'Electronics', 'Synthesis'],
+    founded_year: 1861,
+    headquarters: 'Cambridge, Massachusetts, USA',
+    employee_count: '100-200',
+  },
+  {
+    name: 'Stanford Graphene Group',
+    slug: 'stanford-graphene',
+    description: 'Stanford University research focusing on graphene electronics, biosensors, and energy applications. Home to pioneering CVD growth research.',
+    website: 'https://stanford.edu',
+    company_type: 'research',
+    focus_areas: ['Electronics', 'Biosensors', 'Energy', 'CVD Growth'],
+    founded_year: 1885,
+    headquarters: 'Stanford, California, USA',
+    employee_count: '50-100',
+  },
+  {
+    name: 'National University of Singapore NanoCore',
+    slug: 'nus-nanocore',
+    description: 'Singapore research center with strong graphene program focusing on flexible electronics, energy storage, and biomedical applications.',
+    website: 'https://nus.edu.sg',
+    company_type: 'research',
+    focus_areas: ['Flexible Electronics', 'Energy Storage', 'Biomedical', 'Asia Research'],
+    founded_year: 2010,
+    headquarters: 'Singapore',
+    employee_count: '100-200',
+  },
+  {
+    name: 'Tsinghua-Berkeley Shenzhen Institute',
+    slug: 'tbsi-graphene',
+    description: 'Joint research institute with significant graphene research program focusing on energy, environment, and information technology applications.',
+    website: 'https://tbsi.edu.cn',
+    company_type: 'research',
+    focus_areas: ['Energy', 'Environment', 'Information Technology', 'China-US Collaboration'],
+    founded_year: 2014,
+    headquarters: 'Shenzhen, China',
+    employee_count: '100-200',
+  },
+  {
+    name: 'CNR-ISOF Bologna',
+    slug: 'cnr-isof',
+    description: 'Italian National Research Council institute specializing in graphene synthesis, characterization, and organic-inorganic hybrid materials.',
+    website: 'https://www.isof.cnr.it',
+    company_type: 'research',
+    focus_areas: ['Synthesis', 'Characterization', 'Hybrid Materials', 'Organic Electronics'],
+    founded_year: 1999,
+    headquarters: 'Bologna, Italy',
+    employee_count: '100-200',
+  },
+  {
+    name: 'ETH Zurich Nanomaterials',
+    slug: 'eth-nanomaterials',
+    description: 'Swiss research group working on graphene and 2D materials for electronics, catalysis, and environmental applications.',
+    website: 'https://ethz.ch',
+    company_type: 'research',
+    focus_areas: ['Electronics', 'Catalysis', 'Environmental', 'Fundamental Research'],
+    founded_year: 1855,
+    headquarters: 'Zurich, Switzerland',
+    employee_count: '50-100',
+  },
+  {
+    name: 'Max Planck Institute for Polymer Research',
+    slug: 'mpip-graphene',
+    description: 'German research institute with graphene group focusing on synthesis, functionalization, and polymer-graphene composites.',
+    website: 'https://mpip-mainz.mpg.de',
+    company_type: 'research',
+    focus_areas: ['Synthesis', 'Functionalization', 'Polymer Composites', 'Fundamental Science'],
+    founded_year: 1983,
+    headquarters: 'Mainz, Germany',
+    employee_count: '200-500',
+  },
+  {
+    name: 'CSIRO Graphene Research',
+    slug: 'csiro-graphene',
+    description: 'Australia\'s national science agency with graphene program focusing on industrial applications, energy, and environmental technologies.',
+    website: 'https://csiro.au',
+    company_type: 'research',
+    focus_areas: ['Industrial Applications', 'Energy', 'Environmental', 'Australia Research'],
+    founded_year: 1926,
+    headquarters: 'Melbourne, Australia',
+    employee_count: '100-200',
+  },
+  {
+    name: 'IIT Istituto Italiano di Tecnologia',
+    slug: 'iit-graphene',
+    description: 'Italian research institute and Graphene Flagship partner with strong programs in graphene synthesis, electronics, and biomedical applications.',
+    website: 'https://iit.it',
+    company_type: 'research',
+    focus_areas: ['Synthesis', 'Electronics', 'Biomedical', 'European Research'],
+    founded_year: 2003,
+    headquarters: 'Genoa, Italy',
+    employee_count: '200-500',
+  },
+  {
+    name: 'AIST Japan Graphene Center',
+    slug: 'aist-graphene',
+    description: 'Japan\'s National Institute of Advanced Industrial Science and Technology graphene research center focusing on electronics and industrial applications.',
+    website: 'https://aist.go.jp',
+    company_type: 'research',
+    focus_areas: ['Electronics', 'Industrial Applications', 'Standards', 'Japan Research'],
+    founded_year: 2001,
+    headquarters: 'Tsukuba, Japan',
+    employee_count: '100-200',
+  },
+  {
+    name: 'Catalan Institute of Nanoscience (ICN2)',
+    slug: 'icn2-graphene',
+    description: 'Spanish research institute and Graphene Flagship partner with expertise in graphene physics, electronics, and energy applications.',
+    website: 'https://icn2.cat',
+    company_type: 'research',
+    focus_areas: ['Physics', 'Electronics', 'Energy', 'Graphene Flagship'],
+    founded_year: 2003,
+    headquarters: 'Barcelona, Spain',
+    employee_count: '200-500',
+  },
+  {
+    name: 'IMEC Graphene',
+    slug: 'imec-graphene',
+    description: 'Belgian nanoelectronics research center with significant graphene program focusing on semiconductor integration and 2D material devices.',
+    website: 'https://imec-int.com',
+    company_type: 'research',
+    focus_areas: ['Semiconductors', 'Device Integration', 'Nanoelectronics', 'Industry Partnership'],
+    founded_year: 1984,
+    headquarters: 'Leuven, Belgium',
+    employee_count: '500+',
+  },
+  {
+    name: 'CNRS France Graphene',
+    slug: 'cnrs-graphene',
+    description: 'French National Centre for Scientific Research with multiple graphene laboratories focusing on fundamental science and applications.',
+    website: 'https://cnrs.fr',
+    company_type: 'research',
+    focus_areas: ['Fundamental Science', 'Applications', 'French Research', 'International Collaboration'],
+    founded_year: 1939,
+    headquarters: 'Paris, France',
+    employee_count: '500+',
+  },
+
+  // =============================================================================
+  // INVESTORS & FUNDS - Graphene/Advanced Materials Focus
+  // =============================================================================
+  {
+    name: 'Applied Ventures',
+    slug: 'applied-ventures',
+    description: 'Venture capital arm of Applied Materials investing in advanced materials startups including graphene and 2D materials companies.',
+    website: 'https://appliedmaterials.com/ventures',
+    company_type: 'investor',
+    focus_areas: ['Venture Capital', 'Advanced Materials', 'Semiconductors', 'Clean Tech'],
+    founded_year: 2001,
+    headquarters: 'Santa Clara, California, USA',
+    employee_count: '20-50',
+  },
+  {
+    name: 'Pangaea Ventures',
+    slug: 'pangaea-ventures',
+    description: 'Materials-focused venture capital firm with investments in graphene and advanced materials companies globally.',
+    website: 'https://pangaeaventures.com',
+    company_type: 'investor',
+    focus_areas: ['Venture Capital', 'Materials', 'Industrial Tech', 'Clean Tech'],
+    founded_year: 2000,
+    headquarters: 'Vancouver, Canada',
+    employee_count: '10-20',
+  },
+  {
+    name: 'IP Group',
+    slug: 'ip-group',
+    description: 'UK company specializing in commercializing university research including graphene spin-outs from Manchester and other institutions.',
+    website: 'https://ipgroupplc.com',
+    company_type: 'investor',
+    focus_areas: ['University Spin-outs', 'Technology Transfer', 'Deep Tech', 'UK Focus'],
+    founded_year: 2001,
+    headquarters: 'London, United Kingdom',
+    employee_count: '50-100',
+    funding_stage: 'Public (LSE: IPO)',
+  },
+  {
+    name: 'Lux Capital',
+    slug: 'lux-capital',
+    description: 'Deep tech venture capital firm with portfolio companies in advanced materials, energy, and hard tech sectors.',
+    website: 'https://luxcapital.com',
+    company_type: 'investor',
+    focus_areas: ['Deep Tech', 'Advanced Materials', 'Energy', 'Hard Tech'],
+    founded_year: 2000,
+    headquarters: 'New York, New York, USA',
+    employee_count: '20-50',
+  },
+  {
+    name: 'EIT Raw Materials',
+    slug: 'eit-raw-materials',
+    description: 'EU initiative supporting innovation in raw materials including graphite and graphene, with funding for startups and research projects.',
+    website: 'https://eitrawmaterials.eu',
+    company_type: 'investor',
+    focus_areas: ['EU Funding', 'Raw Materials', 'Innovation', 'Circular Economy'],
+    founded_year: 2016,
+    headquarters: 'Berlin, Germany',
+    employee_count: '50-100',
+  },
+];
+
+async function expandCompanies() {
+  console.log('Expanding company database...\n');
+
+  let added = 0;
+  let errors = 0;
+
+  for (const company of expandedCompanies) {
+    try {
+      const { data, error } = await db
+        .from('companies')
+        .upsert({
+          ...company,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'slug' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error(`✗ Error with ${company.name}:`, error.message);
+        errors++;
+      } else {
+        console.log(`✓ ${company.name} (${company.company_type})`);
+        added++;
+      }
+    } catch (err) {
+      console.error(`✗ Error with ${company.name}:`, err);
+      errors++;
+    }
+  }
+
+  console.log(`\n=== Summary ===`);
+  console.log(`Added/Updated: ${added}`);
+  console.log(`Errors: ${errors}`);
+  console.log(`Total new companies: ${expandedCompanies.length}`);
+
+  // Get total count
+  const { count } = await db
+    .from('companies')
+    .select('*', { count: 'exact', head: true });
+
+  console.log(`Total companies in database: ${count}`);
+}
+
+expandCompanies();

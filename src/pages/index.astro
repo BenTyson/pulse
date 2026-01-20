@@ -2,26 +2,38 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import NewsletterSignup from '../components/NewsletterSignup.astro';
-import { getArticles, getCategoriesWithCounts } from '../lib/supabase';
+import { getArticles, getCategoriesWithCounts, TOPIC_HUBS, getTopicCounts } from '../lib/supabase';
 import type { Article } from '../lib/database.types';
 
 // Fetch articles from Supabase
 let articles: Article[] = [];
 let featuredArticle: Article | null = null;
 let categories: { category: string; count: number }[] = [];
+let topicCounts: Record<string, number> = {};
 
 try {
-  const [featuredResults, recentResults, cats] = await Promise.all([
+  const [featuredResults, recentResults, cats, topics] = await Promise.all([
     getArticles({ featured: true, limit: 1 }),
     getArticles({ limit: 7 }),
     getCategoriesWithCounts(),
+    getTopicCounts(),
   ]);
   featuredArticle = featuredResults[0] || null;
   articles = recentResults.filter((a) => a.id !== featuredArticle?.id).slice(0, 6);
   categories = cats;
+  topicCounts = topics;
 } catch (error) {
   console.error('Error fetching articles:', error);
 }
+
+// Color mapping for topic cards
+const topicColors: Record<string, { bg: string; border: string; text: string }> = {
+  amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400' },
+  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
+  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400' },
+  emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
+  rose: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400' },
+};
 
 const totalArticles = categories.reduce((sum, c) => sum + c.count, 0);
 
@@ -116,12 +128,12 @@ const categoryInfo: Record<string, { icon: string; description: string }> = {
           <div class="text-text-muted text-xs uppercase tracking-wider mt-1">Categories</div>
         </div>
         <div class="bg-bg-primary px-6 py-5 text-center">
-          <div class="text-2xl md:text-3xl font-bold text-white font-mono">9</div>
-          <div class="text-text-muted text-xs uppercase tracking-wider mt-1">Wiki Pages</div>
+          <div class="text-2xl md:text-3xl font-bold text-white font-mono">{TOPIC_HUBS.length}</div>
+          <div class="text-text-muted text-xs uppercase tracking-wider mt-1">Topic Hubs</div>
         </div>
         <div class="bg-bg-primary px-6 py-5 text-center">
-          <div class="text-2xl md:text-3xl font-bold text-white font-mono">Weekly</div>
-          <div class="text-text-muted text-xs uppercase tracking-wider mt-1">Newsletter</div>
+          <div class="text-2xl md:text-3xl font-bold text-white font-mono">15+</div>
+          <div class="text-text-muted text-xs uppercase tracking-wider mt-1">Wiki Pages</div>
         </div>
       </div>
     </div>
@@ -268,6 +280,54 @@ const categoryInfo: Record<string, { icon: string; description: string }> = {
                 {cat.category}
               </h3>
               <p class="text-sm text-text-muted">{info.description}</p>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Topic Hubs -->
+  <section class="border-b border-border">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-bg-surface border border-border flex items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-silver">
+              <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-white">Topic Hubs</h2>
+        </div>
+        <a href="/topics" class="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-white transition-colors">
+          <span>View all</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {TOPIC_HUBS.map((topic) => {
+          const colors = topicColors[topic.color] || topicColors.blue;
+          const articleCount = topicCounts[topic.slug] || 0;
+
+          return (
+            <a
+              href={`/topics/${topic.slug}`}
+              class={`group block p-4 rounded-lg border ${colors.border} ${colors.bg} hover:bg-opacity-20 transition-all duration-200`}
+            >
+              <div class={`p-2 rounded-lg ${colors.bg} ${colors.text} w-fit mb-3`}>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={topic.icon} />
+                </svg>
+              </div>
+              <h3 class="text-sm font-semibold text-silver-bright group-hover:text-white transition-colors mb-1">
+                {topic.title.replace('Graphene ', '')}
+              </h3>
+              <span class={`text-xs ${colors.text}`}>
+                {articleCount} article{articleCount !== 1 ? 's' : ''}
+              </span>
             </a>
           );
         })}

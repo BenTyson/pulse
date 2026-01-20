@@ -17,6 +17,18 @@ const formattedDate = article.published_at
       year: 'numeric',
     })
   : null;
+
+const addedToSiteDate = article.created_at
+  ? new Date(article.created_at).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  : null;
+
+// Show "Added to Pulse" only if different from published date
+const showAddedDate = addedToSiteDate && formattedDate &&
+  new Date(article.created_at).toDateString() !== new Date(article.published_at || '').toDateString();
 ---
 
 <BaseLayout
@@ -62,18 +74,39 @@ const formattedDate = article.published_at
       </h1>
 
       <!-- Meta -->
-      <div class="flex flex-wrap items-center gap-4 text-text-secondary">
+      <div class="flex flex-wrap items-center gap-4 text-text-secondary text-sm">
         {article.author && (
           <span>By {article.author}</span>
         )}
         {article.source_name && (
           <span class="flex items-center gap-2">
             <span class="w-1 h-1 bg-text-muted rounded-full"></span>
-            Source: {article.source_name}
+            <span>Source: <a href={article.source_url} target="_blank" rel="noopener noreferrer" class="text-silver hover:text-silver-light transition-colors underline underline-offset-2">{article.source_name}</a></span>
+          </span>
+        )}
+        {showAddedDate && (
+          <span class="flex items-center gap-2 text-text-muted">
+            <span class="w-1 h-1 bg-text-muted rounded-full"></span>
+            <span>Added to Pulse: {addedToSiteDate}</span>
           </span>
         )}
       </div>
     </header>
+
+    <!-- Article Image -->
+    {article.image_url && (
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="relative rounded-xl overflow-hidden bg-bg-surface-light">
+          <img
+            src={article.image_url}
+            alt=""
+            class="w-full h-auto max-h-96 object-cover"
+            loading="eager"
+            onerror="this.parentElement.style.display='none'"
+          />
+        </div>
+      </div>
+    )}
 
     <!-- Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,8 +120,16 @@ const formattedDate = article.published_at
       <!-- Primary CTA: Read Full Article -->
       {article.source_url && (
         <div class="my-10 p-6 bg-bg-surface rounded-xl border border-bg-surface-light">
+          <div class="flex items-start gap-3 mb-4">
+            <div class="flex items-center gap-1.5 px-2 py-1 bg-bg-surface-light rounded text-xs text-text-muted">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>AI Summary</span>
+            </div>
+          </div>
           <p class="text-text-secondary mb-4">
-            This is a summary. Read the complete article at the source.
+            This is an AI-generated summary of the original article. For the complete content, context, and author's full perspective, visit the original source.
           </p>
           <a
             href={article.source_url}
@@ -96,7 +137,7 @@ const formattedDate = article.published_at
             rel="noopener noreferrer"
             class="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-silver transition-colors"
           >
-            <span>Read Full Article</span>
+            <span>Read Original Article</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>

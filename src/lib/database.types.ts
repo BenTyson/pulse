@@ -55,6 +55,7 @@ export interface Database {
           title: string;
           content: string | null;
           url: string;
+          image_url: string | null;
           published_at: string | null;
           scraped_at: string;
           processed: boolean;
@@ -66,6 +67,7 @@ export interface Database {
           title: string;
           content?: string | null;
           url: string;
+          image_url?: string | null;
           published_at?: string | null;
           scraped_at?: string;
           processed?: boolean;
@@ -77,6 +79,7 @@ export interface Database {
           title?: string;
           content?: string | null;
           url?: string;
+          image_url?: string | null;
           published_at?: string | null;
           scraped_at?: string;
           processed?: boolean;
